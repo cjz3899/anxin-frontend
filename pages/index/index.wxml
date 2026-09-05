@@ -1,0 +1,14 @@
+<!--index.wxml —— 【临时测试页】微信小程序登录联调测试-->
+<navigation-bar title="登录联调测试" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="container">
+    <view class="tips">后端地址: http://localhost:8080</view>
+    <button class="btn" type="primary" bindtap="onTestLogin">1. 真实登录测试(wx.login → /login → /profile → /refresh)</button>
+    <button class="btn" bindtap="onTestBadCode">2. 失败分支(伪造 code 调 /login)</button>
+    <button class="btn mini" bindtap="onClearLog">清空日志</button>
+    <view class="log-title">日志输出:</view>
+    <scroll-view class="log-box" scroll-y scroll-top="{{scrollTop}}">
+      <view class="log-line" wx:for="{{logs}}" wx:key="index">{{item}}</view>
+    </scroll-view>
+  </view>
+</scroll-view>
