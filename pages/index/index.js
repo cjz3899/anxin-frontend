@@ -1,93 +1,92 @@
-// index.js —— 【临时测试页】微信小程序登录联调测试，测试完成后由脚本还原
 const BASE_URL = 'http://localhost:8080'
 
 Page({
   data: {
-    logs: []
+    uploading: false,
+    uploadProgress: 0,
+    fileList: []
   },
 
-  onTestLogin() {
-    this.appendLog('[步骤0] 开始真实登录测试，调用 wx.login() 获取 code...')
-    wx.login({
+  onShow() {
+    this.checkLogin()
+  },
+
+  checkLogin() {
+    const token = wx.getStorageSync('accessToken')
+    if (!token) {
+      wx.redirectTo({ url: '/pages/login/login' })
+    }
+  },
+
+  onChooseFile() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['file'],
+      extension: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
       success: (res) => {
-        if (res.code) {
-          this.appendLog('[步骤0] wx.login 成功，code=' + res.code.slice(0, 16) + '...')
-          this.doLogin(res.code)
+        const file = res.tempFiles[0]
+        const ext = file.tempFilePath.split('.').pop().toLowerCase()
+        const allowedExts = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png']
+        if (!allowedExts.includes(ext)) {
+          wx.showToast({ title: '仅支持PDF/Word/图片', icon: 'none' })
+          return
+        }
+        const maxSize = ['jpg', 'jpeg', 'png'].includes(ext) ? 5 * 1024 * 1024 : 10 * 1024 * 1024
+        if (file.size > maxSize) {
+          wx.showToast({ title: '文件大小超限', icon: 'none' })
+          return
+        }
+        this.uploadFile(file.tempFilePath, file.tempFilePath.split('/').pop())
+      }
+    })
+  },
+
+  uploadFile(filePath, fileName) {
+    this.setData({ uploading: true, uploadProgress: 0 })
+    const token = wx.getStorageSync('accessToken')
+    const uploadTask = wx.uploadFile({
+      url: BASE_URL + '/api/document/upload',
+      filePath: filePath,
+      name: 'file',
+      header: { token: token },
+      success: (res) => {
+        const data = JSON.parse(res.data)
+        if (data.code === 1) {
+          wx.showToast({ title: '上传成功', icon: 'success' })
+          const item = {
+            id: data.data.documentId,
+            taskId: data.data.taskId,
+            name: fileName,
+            status: data.data.status,
+            time: this.formatTime(new Date())
+          }
+          const fileList = [item].concat(this.data.fileList)
+          this.setData({ fileList: fileList })
         } else {
-          this.appendLog('[步骤0] wx.login 未返回 code: ' + JSON.stringify(res))
+          wx.showToast({ title: data.msg || '上传失败', icon: 'none' })
         }
       },
-      fail: (err) => {
-        this.appendLog('[步骤0] wx.login 失败: ' + err.errMsg)
-      }
-    })
-  },
-
-  onTestBadCode() {
-    this.appendLog('===== 失败分支测试：伪造 code 调用 /login =====')
-    this.doLogin('opencode_fake_code_for_fail_test')
-  },
-
-  doLogin(code) {
-    wx.request({
-      url: BASE_URL + '/api/user/login',
-      method: 'POST',
-      header: { 'content-type': 'application/json' },
-      data: { code },
-      success: (res) => {
-        this.appendLog('[步骤1] POST /api/user/login 响应: ' + JSON.stringify(res.data))
-        const body = res.data || {}
-        if (body.code === 1 && body.data) {
-          const token = body.data.accessToken
-          this.appendLog('[步骤1] 登录成功! userId=' + body.data.id)
-          this.doProfile(token)
-          this.doRefresh(body.data.refreshToken)
-        } else {
-          this.appendLog('[步骤1] 登录失败, 错误码=' + body.code + ', 信息=' + body.msg)
-        }
+      fail: () => {
+        wx.showToast({ title: '网络错误', icon: 'none' })
       },
-      fail: (err) => {
-        this.appendLog('[步骤1] /login 请求失败: ' + err.errMsg + '（请确认已勾选"不校验合法域名"且后端已启动）')
+      complete: () => {
+        this.setData({ uploading: false, uploadProgress: 0 })
       }
+    })
+    uploadTask.onProgressUpdate((res) => {
+      this.setData({ uploadProgress: res.progress })
     })
   },
 
-  doProfile(token) {
-    wx.request({
-      url: BASE_URL + '/api/user/profile',
-      method: 'POST',
-      header: { 'content-type': 'application/json', token },
-      data: { nickname: '微信测试用户', avatar: '' },
-      success: (res) => {
-        this.appendLog('[步骤2] POST /api/user/profile (携带token) 响应: ' + JSON.stringify(res.data))
-      },
-      fail: (err) => {
-        this.appendLog('[步骤2] /profile 请求失败: ' + err.errMsg)
-      }
-    })
+  onViewReport(e) {
+    const taskId = e.currentTarget.dataset.taskid
+    wx.showToast({ title: '功能开发中', icon: 'none' })
   },
 
-  doRefresh(refreshToken) {
-    wx.request({
-      url: BASE_URL + '/api/user/refresh',
-      method: 'POST',
-      header: { 'content-type': 'application/json' },
-      data: { refreshToken },
-      success: (res) => {
-        this.appendLog('[步骤3] POST /api/user/refresh 响应: ' + JSON.stringify(res.data))
-      },
-      fail: (err) => {
-        this.appendLog('[步骤3] /refresh 请求失败: ' + err.errMsg)
-      }
-    })
-  },
-
-  onClearLog() {
-    this.setData({ logs: [] })
-  },
-
-  appendLog(line) {
-    const time = new Date().toLocaleTimeString()
-    this.setData({ logs: this.data.logs.concat('[' + time + '] ' + line) })
+  formatTime(date) {
+    const y = date.getFullYear()
+    const m = (date.getMonth() + 1).toString().padStart(2, '0')
+    const d = date.getDate().toString().padStart(2, '0')
+    return `${y}-${m}-${d}`
   }
 })

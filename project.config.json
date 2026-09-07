@@ -11,7 +11,17 @@
       "disablePlugins": [],
       "outputPath": ""
     },
-    "useCompilerPlugins": false
+    "useCompilerPlugins": false,
+    "compileWorklet": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
   },
   "compileType": "miniprogram",
   "simulatorPluginLibVersion": {},
@@ -19,7 +29,7 @@
     "ignore": [],
     "include": []
   },
-  "appid": "wxfecc26a8ec2ed78e",
+  "appid": "wxcf8208fdc6c87cfc",
   "editorSetting": {},
   "isGameTourist": false
 }

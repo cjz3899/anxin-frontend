@@ -1,14 +1,34 @@
-<!--index.wxml —— 【临时测试页】微信小程序登录联调测试-->
-<navigation-bar title="登录联调测试" back="{{false}}" color="black" background="#FFF"></navigation-bar>
-<scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-    <view class="tips">后端地址: http://localhost:8080</view>
-    <button class="btn" type="primary" bindtap="onTestLogin">1. 真实登录测试(wx.login → /login → /profile → /refresh)</button>
-    <button class="btn" bindtap="onTestBadCode">2. 失败分支(伪造 code 调 /login)</button>
-    <button class="btn mini" bindtap="onClearLog">清空日志</button>
-    <view class="log-title">日志输出:</view>
-    <scroll-view class="log-box" scroll-y scroll-top="{{scrollTop}}">
-      <view class="log-line" wx:for="{{logs}}" wx:key="index">{{item}}</view>
-    </scroll-view>
+<view class="container">
+  <view class="header">
+    <view class="title">安心文档分析</view>
+    <view class="subtitle">上传文件，智能识别合同风险</view>
   </view>
-</scroll-view>
+
+  <view class="upload-area" bindtap="onChooseFile">
+    <view class="upload-icon">+</view>
+    <view class="upload-text" wx:if="{{!uploading}}">上传文件</view>
+    <view class="upload-text" wx:else>上传中 {{uploadProgress}}%</view>
+    <view class="upload-hint">支持 PDF、Word、图片（≤10MB）</view>
+  </view>
+
+  <view class="section-title" wx:if="{{fileList.length > 0}}">历史文件</view>
+
+  <view class="file-list">
+    <view class="file-item" wx:for="{{fileList}}" wx:key="id" bindtap="onViewReport" data-taskid="{{item.taskId}}">
+      <view class="file-info">
+        <view class="file-icon">📄</view>
+        <view class="file-detail">
+          <view class="file-name">{{item.name}}</view>
+          <view class="file-meta">{{item.time}}</view>
+        </view>
+      </view>
+      <view class="file-status {{item.status === 'SUCCESS' ? 'status-success' : 'status-pending'}}">
+        {{item.status === 'SUCCESS' ? '已完成' : '分析中'}}
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-hint" wx:if="{{fileList.length === 0 && !uploading}}">
+    <text>暂无文件，点击上方上传</text>
+  </view>
+</view>

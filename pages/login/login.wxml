@@ -1,0 +1,22 @@
+<view class="login-container">
+  <view class="logo-area">
+    <view class="logo-icon">
+      <text class="logo-text">安心</text>
+    </view>
+    <view class="app-name">安心文档分析</view>
+    <view class="app-desc">智能合同风险分析助手</view>
+  </view>
+
+  <view class="btn-area">
+    <button class="login-btn" bindtap="onLogin" loading="{{loading}}" disabled="{{loading}}">
+      微信一键登录
+    </button>
+  </view>
+
+  <view class="footer">
+    <text class="footer-text">登录即同意</text>
+    <text class="footer-link">《用户协议》</text>
+    <text class="footer-text">和</text>
+    <text class="footer-link">《隐私政策》</text>
+  </view>
+</view>
