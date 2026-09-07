@@ -1,34 +1,79 @@
-<view class="container">
-  <view class="header">
-    <view class="title">安心文档分析</view>
-    <view class="subtitle">上传文件，智能识别合同风险</view>
-  </view>
+<navigation-bar title="登录 · 完善资料" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<view class="page">
+  <scroll-view class="scrollarea" scroll-y>
 
-  <view class="upload-area" bindtap="onChooseFile">
-    <view class="upload-icon">+</view>
-    <view class="upload-text" wx:if="{{!uploading}}">上传文件</view>
-    <view class="upload-text" wx:else>上传中 {{uploadProgress}}%</view>
-    <view class="upload-hint">支持 PDF、Word、图片（≤10MB）</view>
-  </view>
-
-  <view class="section-title" wx:if="{{fileList.length > 0}}">历史文件</view>
-
-  <view class="file-list">
-    <view class="file-item" wx:for="{{fileList}}" wx:key="id" bindtap="onViewReport" data-taskid="{{item.taskId}}">
-      <view class="file-info">
-        <view class="file-icon">📄</view>
-        <view class="file-detail">
-          <view class="file-name">{{item.name}}</view>
-          <view class="file-meta">{{item.time}}</view>
+    <view class="card account">
+      <view class="account-head">
+        <image wx:if="{{profile.avatar}}" class="account-avatar" src="{{profile.avatar}}" mode="aspectFill" />
+        <view wx:else class="account-avatar account-avatar-empty">
+          <text>{{loggedIn ? (avatarText || '用') : '微'}}</text>
+        </view>
+        <view class="account-meta">
+          <view class="account-name">{{loggedIn ? (profile.nickname || '用户已登录') : '未登录'}}</view>
+          <view class="account-desc" wx:if="{{loggedIn}}">用户 ID：{{userId}}</view>
+          <view class="account-desc" wx:else>使用微信官方 wx.login 登录</view>
         </view>
       </view>
-      <view class="file-status {{item.status === 'SUCCESS' ? 'status-success' : 'status-pending'}}">
-        {{item.status === 'SUCCESS' ? '已完成' : '分析中'}}
+      <button wx:if="{{!loggedIn}}" class="btn-primary" hover-class="btn-primary-hover" loading="{{loggingIn}}" bindtap="onLogin">微信一键登录</button>
+      <view wx:else class="account-actions">
+        <button class="btn-text" loading="{{refreshing}}" bindtap="onRefresh">刷新 Token</button>
+        <button class="btn-text" bindtap="onLogout">退出登录</button>
       </view>
     </view>
-  </view>
 
-  <view class="empty-hint" wx:if="{{fileList.length === 0 && !uploading}}">
-    <text>暂无文件，点击上方上传</text>
-  </view>
+    <view class="card {{loggedIn ? '' : 'card-disabled'}}">
+      <view class="card-title">完善资料</view>
+
+      <view class="form-row">
+        <text class="form-label">头像</text>
+        <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar" disabled="{{!loggedIn}}">
+          <image wx:if="{{avatarTempPath}}" class="avatar-preview" src="{{avatarTempPath}}" mode="aspectFill" />
+          <view wx:else class="avatar-preview avatar-preview-empty">选择头像</view>
+        </button>
+        <view class="form-side">
+          <text class="form-tip">点左侧按钮选择微信头像</text>
+          <text class="form-tip">官方裁剪为 1:1，≤2MB</text>
+        </view>
+      </view>
+      <view class="avatar-status {{avatarStatusClass}}" wx:if="{{avatarStatus}}">{{avatarStatus}}</view>
+
+      <view class="form-row">
+        <text class="form-label">昵称</text>
+        <input class="nickname-input" type="nickname" placeholder="请输入昵称" value="{{nickname}}" bindinput="onNicknameInput" disabled="{{!loggedIn}}" />
+        <view class="form-side">
+          <text class="form-tip">官方昵称填写能力</text>
+        </view>
+      </view>
+
+      <view class="action-row">
+        <button class="btn-secondary" disabled="{{!loggedIn || uploading}}" loading="{{uploading}}" bindtap="onUploadAvatar">上传头像（微信审核 → OSS）</button>
+      </view>
+      <view class="action-row">
+        <button class="btn-primary" disabled="{{!loggedIn || saving || !nickname}}" loading="{{saving}}" bindtap="onSaveProfile">保存资料（昵称 + 头像 URL）</button>
+      </view>
+
+      <view class="saved-box" wx:if="{{profile.nickname || profile.avatar}}">
+        <view class="saved-title">服务端最新资料（/profile 返回）</view>
+        <view class="saved-body">
+          <image wx:if="{{profile.avatar}}" class="saved-avatar" src="{{profile.avatar}}" mode="aspectFill" />
+          <text class="saved-nickname">{{profile.nickname}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title card-title-row">
+        <text>联调日志</text>
+        <view class="btn-text small" bindtap="onClearLog">清空</view>
+      </view>
+      <scroll-view class="log-box" scroll-y scroll-top="{{logScrollTop}}">
+        <view class="log-line" wx:for="{{logs}}" wx:key="index">
+          <text class="log-time">{{item.time}}</text>
+          <text class="{{item.kind === 'err' ? 'log-text-err' : (item.kind === 'ok' ? 'log-text-ok' : '')}}">{{item.text}}</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="foot-tip">后端地址 {{baseUrl}}，须在开发者工具勾选“不校验合法域名”</view>
+  </scroll-view>
 </view>
