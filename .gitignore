@@ -1,4 +1,8 @@
 .DS_Store
 node_modules/
-miniprogram_npm/
+dist/
+.project.sw.json
 project.private.config.json
+.swc/
+.temp/
+.idea/
