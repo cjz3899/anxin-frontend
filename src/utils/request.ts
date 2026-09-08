@@ -40,7 +40,7 @@ function handleAuthExpired() {
  * code === 1 视为成功，登录过期（401 / 10005）时提示并跳登录页，其余 toast 并 reject。
  */
 export function request<T = unknown>(options: RequestOptions): Promise<T> {
-  const token = Taro.getStorageSync('accessToken')
+  const authorization = Taro.getStorageSync('accessToken')
 
   return new Promise<T>((resolve, reject) => {
     Taro.request({
@@ -49,7 +49,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
       data: options.data,
       header: {
         'content-type': 'application/json',
-        ...(token ? { token } : {}),
+        ...(authorization ? { authorization } : {}),
         ...options.header,
       },
       success: res => {
@@ -77,7 +77,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
  * 解析 { code, data, msg }。用于头像等文件上传接口。
  */
 export function upload<T = unknown>(options: UploadOptions): Promise<T> {
-  const token = Taro.getStorageSync('accessToken')
+  const authorization = Taro.getStorageSync('accessToken')
 
   return new Promise<T>((resolve, reject) => {
     Taro.uploadFile({
@@ -86,7 +86,7 @@ export function upload<T = unknown>(options: UploadOptions): Promise<T> {
       name: options.name || 'file',
       formData: options.formData,
       header: {
-        ...(token ? { token } : {}),
+        ...(authorization ? { authorization } : {}),
         ...options.header,
       },
       success: res => {
