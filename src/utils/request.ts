@@ -1,5 +1,8 @@
 import Taro from '@tarojs/taro'
 
+import { STORAGE_KEYS } from '../constants'
+import { expireAuthSession } from './auth-expiration'
+
 const BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080'
 
 /** 业务码：后端约定 10005 与 HTTP 401 同义，表示登录过期 */
@@ -31,16 +34,18 @@ function isAuthExpired(code: number): boolean {
 }
 
 function handleAuthExpired() {
-  Taro.showToast({ title: '登录已过期', icon: 'none' })
-  Taro.navigateTo({ url: '/pages/login/index' })
+  expireAuthSession({
+    removeStorage: key => Taro.removeStorageSync(key),
+    notify: title => Taro.showToast({ title, icon: 'none' }),
+  })
 }
 
 /**
  * 统一请求封装：注入 accessToken、统一解析 { code, data, msg } 返回格式。
- * code === 1 视为成功，登录过期（401 / 10005）时提示并跳登录页，其余 toast 并 reject。
+ * code === 1 视为成功，登录过期（401 / 10005）时清理本地登录态，其余 toast 并 reject。
  */
 export function request<T = unknown>(options: RequestOptions): Promise<T> {
-  const authorization = Taro.getStorageSync('accessToken')
+  const authorization = Taro.getStorageSync(STORAGE_KEYS.ACCESS_TOKEN)
 
   return new Promise<T>((resolve, reject) => {
     Taro.request({
@@ -77,7 +82,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
  * 解析 { code, data, msg }。用于头像等文件上传接口。
  */
 export function upload<T = unknown>(options: UploadOptions): Promise<T> {
-  const authorization = Taro.getStorageSync('accessToken')
+  const authorization = Taro.getStorageSync(STORAGE_KEYS.ACCESS_TOKEN)
 
   return new Promise<T>((resolve, reject) => {
     Taro.uploadFile({
