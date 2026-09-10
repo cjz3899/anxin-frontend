@@ -1,10 +1,29 @@
+@import './styles/tokens.less';
+@import './styles/theme.less';
+@import './components/app-button/index.less';
+@import './components/bottom-nav/index.less';
+@import './components/empty-page/index.less';
+@import './components/page-shell/index.less';
+@import './components/status-tag/index.less';
+
 page {
-  background-color: #f5f5f5;
-  color: #333333;
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background-color: var(--ax-color-page);
+  color: var(--ax-color-text-primary);
+  font-family: var(--ax-font-family);
   -webkit-font-smoothing: antialiased;
 }
 
 button::after {
   border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
 }

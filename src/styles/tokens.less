@@ -1,0 +1,82 @@
+@import './primitives.less';
+
+page {
+  --ax-color-brand: @ax-blue-500;
+  --ax-color-brand-pressed: @ax-blue-600;
+  --ax-color-brand-soft: @ax-blue-50;
+  --ax-color-brand-subtle: @ax-blue-100;
+  --ax-color-surface: @ax-white;
+  --ax-color-surface-raised: @ax-white;
+  --ax-color-surface-subtle: @ax-neutral-25;
+  --ax-color-page: @ax-neutral-50;
+  --ax-color-border: @ax-neutral-200;
+  --ax-color-border-strong: @ax-neutral-300;
+  --ax-color-text-secondary: @ax-neutral-600;
+  --ax-color-text-primary: @ax-neutral-900;
+  --ax-color-text-inverse: @ax-white;
+  --ax-color-text-disabled: @ax-neutral-300;
+
+  --ax-color-danger-icon: @ax-danger-icon;
+  --ax-color-danger-text: @ax-danger-text;
+  --ax-color-danger-bg: @ax-danger-bg;
+  --ax-color-warning-icon: @ax-warning-icon;
+  --ax-color-warning-text: @ax-warning-text;
+  --ax-color-warning-bg: @ax-warning-bg;
+  --ax-color-success-icon: @ax-success-icon;
+  --ax-color-success-text: @ax-success-text;
+  --ax-color-success-bg: @ax-success-bg;
+  --ax-color-info-icon: @ax-blue-500;
+  --ax-color-info-text: @ax-blue-600;
+  --ax-color-info-bg: @ax-blue-50;
+  --ax-color-neutral-icon: @ax-neutral-600;
+  --ax-color-neutral-text: @ax-neutral-600;
+  --ax-color-neutral-bg: @ax-neutral-50;
+
+  --ax-color-purple: @ax-purple;
+  --ax-color-navy: @ax-navy;
+  --ax-color-gold: @ax-gold;
+  --ax-color-overlay-light: fade(@ax-white, 16%);
+  --ax-color-overlay-medium: fade(@ax-white, 64%);
+  --ax-color-backdrop: fade(@ax-navy, 10%);
+
+  --ax-gradient-brand: linear-gradient(135deg, @ax-blue-500, @ax-blue-600);
+  --ax-gradient-brand-accent: linear-gradient(135deg, @ax-blue-500, @ax-purple);
+  --ax-gradient-page: radial-gradient(circle at 90% 0, fade(@ax-blue-500, 10%), transparent 30%);
+  --ax-gradient-danger: linear-gradient(135deg, @ax-danger-bg, fade(@ax-danger-bg, 72%));
+
+  --ax-font-family: 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ax-font-size-xs: 22rpx;
+  --ax-font-size-sm: 24rpx;
+  --ax-font-size-base: 26rpx;
+  --ax-font-size-md: 28rpx;
+  --ax-font-size-lg: 32rpx;
+  --ax-font-size-xl: 36rpx;
+  --ax-font-size-2xl: 40rpx;
+  --ax-font-size-display: 48rpx;
+  --ax-font-weight-regular: 400;
+  --ax-font-weight-medium: 500;
+  --ax-font-weight-semibold: 600;
+  --ax-font-weight-bold: 700;
+
+  --ax-space-1: 8rpx;
+  --ax-space-2: 12rpx;
+  --ax-space-3: 16rpx;
+  --ax-space-4: 24rpx;
+  --ax-space-5: 32rpx;
+  --ax-space-6: 40rpx;
+  --ax-space-7: 48rpx;
+  --ax-space-8: 64rpx;
+
+  --ax-radius-sm: 8rpx;
+  --ax-radius-md: 16rpx;
+  --ax-radius-lg: 24rpx;
+  --ax-radius-xl: 32rpx;
+  --ax-radius-pill: 999rpx;
+  --ax-size-touch: 88rpx;
+
+  --ax-shadow-light: 0 12rpx 36rpx fade(@ax-navy, 8%);
+  --ax-shadow-floating: 0 22rpx 56rpx fade(@ax-navy, 16%);
+  --ax-duration-fast: 120ms;
+  --ax-duration-base: 180ms;
+  --ax-duration-slow: 280ms;
+}

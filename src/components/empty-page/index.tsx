@@ -1,9 +1,11 @@
-import { Text, View } from '@tarojs/components'
+import type { ReactNode } from 'react'
+import Empty from '@nutui/nutui-react-taro/dist/es/packages/empty'
+import { View } from '@tarojs/components'
 
-import './index.less'
+import StatusTag from '../status-tag'
 
-interface EmptyPageProps {
-  icon: string
+export interface EmptyPageProps {
+  icon: ReactNode
   title: string
   description: string
 }
@@ -11,11 +13,15 @@ interface EmptyPageProps {
 export default function EmptyPage({ icon, title, description }: EmptyPageProps) {
   return (
     <View className="empty-page">
-      <View className="empty-page__glow" />
-      <View className="empty-page__icon">{icon}</View>
-      <Text className="empty-page__title">{title}</Text>
-      <Text className="empty-page__description">{description}</Text>
-      <View className="empty-page__status">页面建设中</View>
+      <Empty
+        description={description}
+        image={<View className="empty-page__icon">{icon}</View>}
+        imageSize="152rpx"
+        size="base"
+        status="empty"
+        title={title}
+      />
+      <StatusTag tone="info">页面建设中</StatusTag>
     </View>
   )
 }

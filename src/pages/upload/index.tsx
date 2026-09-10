@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import Taro from '@tarojs/taro'
-import { Button, Text, View } from '@tarojs/components'
+import { ArrowUp, Edit, Order, Photograph, Success, Tips } from '@nutui/icons-react-taro'
+import { Text, View } from '@tarojs/components'
 
+import AppButton from '../../components/app-button'
+import PageShell from '../../components/page-shell'
 import { uploadDocument } from '../../services'
 
 import './index.less'
@@ -47,13 +50,15 @@ export default function UploadPage() {
   }
 
   return (
-    <View className="upload-page">
+    <PageShell className="upload-page">
       <View
         className={`drop-zone ${selectedFile ? 'drop-zone--selected' : ''}`}
         hoverClass="drop-zone--pressed"
         onClick={handleChoose}
       >
-        <View className="drop-zone__icon">{selectedFile ? '✓' : '↥'}</View>
+        <View className="drop-zone__icon">
+          {selectedFile ? <Success size="34" /> : <ArrowUp size="34" />}
+        </View>
         <Text className="drop-zone__title">
           {selectedFile ? selectedFile.name : '点击选择文件'}
         </Text>
@@ -68,33 +73,41 @@ export default function UploadPage() {
         <Text className="upload-section__note">PDF / DOCX / JPG / PNG，文档最大 10MB</Text>
         <View className="format-grid">
           <View className="format-card format-card--pdf">
-            <Text className="format-card__icon">▣</Text>
+            <View className="format-card__icon">
+              <Order size="28" />
+            </View>
             <Text className="format-card__label">PDF</Text>
           </View>
           <View className="format-card format-card--word">
-            <Text className="format-card__icon">W</Text>
+            <View className="format-card__icon">
+              <Edit size="28" />
+            </View>
             <Text className="format-card__label">Word</Text>
           </View>
           <View className="format-card format-card--image">
-            <Text className="format-card__icon">▧</Text>
+            <View className="format-card__icon">
+              <Photograph size="28" />
+            </View>
             <Text className="format-card__label">图片</Text>
           </View>
         </View>
       </View>
 
       <View className="upload-tip">
-        <Text className="upload-tip__icon">i</Text>
+        <View className="upload-tip__icon">
+          <Tips size="18" />
+        </View>
         <Text>文件仅用于本次风险分析，请勿上传含有无关敏感信息的内容。</Text>
       </View>
 
-      <Button
+      <AppButton
         className="upload-submit"
         disabled={!selectedFile || uploading}
         loading={uploading}
         onClick={handleUpload}
       >
         {selectedFile ? '上传并开始分析' : '请先选择文件'}
-      </Button>
-    </View>
+      </AppButton>
+    </PageShell>
   )
 }

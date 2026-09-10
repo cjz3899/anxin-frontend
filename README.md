@@ -10,7 +10,6 @@
 - Taro 4.1.6
 - React 18
 - NutUI（Taro 版）
-- TailwindCSS 3.x
 - TypeScript 5.x
 - Less（样式预处理器）
 
@@ -19,11 +18,11 @@
 ### 业务开发规范
 
 - **请求封装**：所有请求都使用 `src/utils/request.ts` 中的 `request` 函数，统一请求返回格式处理
-- **颜色规范**：引用 `config/theme/specification.ts` 中的 `SpecificationColors` 规范颜色
-- **TailwindCSS**：直接使用规范颜色，不需要考虑颜色值，直接使用规范颜色即可（与设计稿一致）
-- **NutUI 样式**：不需要考虑颜色尺寸等与 UI 不一致的问题，直接使用即可，有问题后续会在 `app.less` 中统一修改
-- **尺寸规范**：暂时不需要考虑规范化尺寸，按设计稿进行开发即可
-- **组件优先**：【重要】组件开发优先，可以使用 NutUI 组件就不要手绘
+- **设计 Token**：业务样式只使用 `src/styles/tokens.less` 提供的 `--ax-*` 语义 Token
+- **NutUI 主题**：组件主题统一维护在 `src/styles/theme.less`，样式按使用到的组件引入
+- **组件优先**：按“现有业务组件 → NutUI → Taro 原生组合 → 自建组件”的顺序开发
+- **设计系统检查**：提交前运行 `pnpm check:design-system`，禁止业务 Less 硬编码颜色及 NutUI 全量样式导入
+- **完整验证**：提交前运行 `pnpm verify`
 
 ### 代码规范
 
@@ -289,7 +288,6 @@ pnpm prepare
 - [Taro 文档](https://taro-docs.jd.com/)
 - [React 文档](https://react.dev/)
 - [NutUI 文档](https://nutui.jd.com/)
-- [TailwindCSS 文档](https://tailwindcss.com/)
 - [TypeScript 文档](https://www.typescriptlang.org/)
 - [Conventional Commits 规范](https://www.conventionalcommits.org/zh-hans/)
 - [ESLint 文档](https://eslint.org/)

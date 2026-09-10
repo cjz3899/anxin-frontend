@@ -1,54 +1,63 @@
+@import '../../styles/mixins.less';
+
 .home-page {
-  box-sizing: border-box;
-  min-height: 100vh;
-  padding: 34rpx 32rpx 162rpx;
-  background:
-    radial-gradient(circle at 92% 6%, rgba(102, 126, 234, 0.12), transparent 30%), #f5f5f5;
+  padding-top: var(--ax-space-4);
+  background: var(--ax-gradient-page), var(--ax-color-page);
 }
 
 .home-header {
   display: flex;
+  min-height: var(--ax-size-touch);
+  padding: 0 var(--ax-space-1) var(--ax-space-5);
   align-items: center;
   justify-content: space-between;
-  padding: 8rpx 8rpx 36rpx;
 
-  &__eyebrow,
-  &__title {
+  &__identity {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--ax-space-3);
+  }
+
+  &__brand-icon {
+    display: flex;
+    width: 56rpx;
+    height: 64rpx;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    color: var(--ax-color-text-inverse);
+    background: var(--ax-gradient-brand);
+    border-radius: 18rpx 18rpx var(--ax-radius-lg) var(--ax-radius-lg);
+  }
+
+  &__title,
+  &__subtitle {
     display: block;
   }
 
-  &__eyebrow {
-    color: #667eea;
-    font-size: 19rpx;
-    font-weight: 600;
-    letter-spacing: 4rpx;
-  }
-
   &__title {
-    margin-top: 12rpx;
-    font-size: 38rpx;
-    font-weight: 700;
+    font-size: var(--ax-font-size-lg);
+    font-weight: var(--ax-font-weight-bold);
   }
 
-  &__status {
-    padding: 12rpx 18rpx;
-    color: #078948;
-    font-size: 21rpx;
-    background: #e8f8f0;
-    border-radius: 999rpx;
+  &__subtitle {
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
   }
 }
 
 .upload-hero {
   position: relative;
   box-sizing: border-box;
-  height: 350rpx;
-  padding: 42rpx;
+  min-height: 360rpx;
+  padding: var(--ax-space-6);
   overflow: hidden;
-  color: #ffffff;
-  background: linear-gradient(145deg, #667eea 0%, #7064cc 58%, #764ba2 100%);
-  border-radius: 38rpx;
-  box-shadow: 0 30rpx 70rpx rgba(92, 83, 175, 0.25);
+  color: var(--ax-color-text-inverse);
+  background: var(--ax-gradient-brand-accent);
+  border-radius: var(--ax-radius-xl);
+  box-shadow: var(--ax-shadow-floating);
 
   &__halo {
     position: absolute;
@@ -56,8 +65,8 @@
     right: -40rpx;
     width: 300rpx;
     height: 300rpx;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
+    background: var(--ax-color-overlay-light);
+    border-radius: var(--ax-radius-pill);
   }
 
   &__document {
@@ -68,18 +77,18 @@
     width: 154rpx;
     height: 188rpx;
     padding: 46rpx 26rpx;
-    background: rgba(255, 255, 255, 0.18);
-    border: 1rpx solid rgba(255, 255, 255, 0.26);
-    border-radius: 24rpx;
+    background: var(--ax-color-overlay-light);
+    border: 1rpx solid var(--ax-color-overlay-medium);
+    border-radius: var(--ax-radius-lg);
     transform: rotate(5deg);
   }
 
   &__line {
     width: 64rpx;
-    height: 8rpx;
-    margin-bottom: 16rpx;
-    background: rgba(255, 255, 255, 0.62);
-    border-radius: 99rpx;
+    height: var(--ax-space-1);
+    margin-bottom: var(--ax-space-3);
+    background: var(--ax-color-overlay-medium);
+    border-radius: var(--ax-radius-pill);
 
     &--long {
       width: 94rpx;
@@ -88,14 +97,14 @@
 
   &__shield {
     display: flex;
-    width: 52rpx;
-    height: 52rpx;
-    margin-top: 20rpx;
+    width: 56rpx;
+    height: 56rpx;
+    margin-top: var(--ax-space-3);
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    background: rgba(255, 255, 255, 0.22);
-    border-radius: 18rpx;
+    color: var(--ax-color-text-inverse);
+    background: var(--ax-color-overlay-light);
+    border-radius: var(--ax-radius-md);
   }
 
   &__title,
@@ -106,58 +115,47 @@
 
   &__title {
     max-width: 390rpx;
-    font-size: 38rpx;
-    font-weight: 700;
+    font-size: var(--ax-font-size-xl);
+    font-weight: var(--ax-font-weight-bold);
   }
 
   &__description {
-    margin-top: 12rpx;
-    font-size: 25rpx;
-    opacity: 0.76;
+    margin-top: var(--ax-space-2);
+    font-size: var(--ax-font-size-sm);
+    opacity: 0.8;
   }
 
   &__button {
-    position: relative;
-    display: flex;
-    width: 220rpx;
-    height: 78rpx;
-    margin-top: 54rpx;
-    align-items: center;
-    justify-content: center;
-    color: #667eea;
-    font-size: 26rpx;
-    font-weight: 600;
-    background: #ffffff;
-    border-radius: 24rpx;
-    transition: transform 160ms ease;
-
-    &--pressed {
-      transform: scale(0.97);
-    }
+    width: 236rpx;
+    margin-top: var(--ax-space-7);
+    color: var(--ax-color-brand) !important;
+    background: var(--ax-color-surface) !important;
+    border-color: var(--ax-color-surface) !important;
+    box-shadow: none;
   }
 }
 
 .shortcut-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 22rpx;
-  margin-top: 30rpx;
+  gap: var(--ax-space-4);
+  margin-top: var(--ax-space-5);
 }
 
 .shortcut-card {
   box-sizing: border-box;
   min-height: 190rpx;
-  padding: 30rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.7);
-  border-radius: 30rpx;
-  transition: transform 160ms ease;
+  padding: var(--ax-space-5);
+  border: 1rpx solid var(--ax-color-border);
+  border-radius: var(--ax-radius-lg);
+  transition: transform var(--ax-duration-fast) ease;
 
   &--primary {
-    background: linear-gradient(145deg, #eef1ff, #f6f4ff);
+    background: var(--ax-color-brand-soft);
   }
 
   &--success {
-    background: linear-gradient(145deg, #eaf9f2, #f4fbf8);
+    background: var(--ax-color-success-bg);
   }
 
   &--pressed {
@@ -171,103 +169,93 @@
   }
 
   &__icon {
-    color: #667eea;
-    font-size: 36rpx;
+    color: var(--ax-color-brand);
+  }
+
+  &--success &__icon {
+    color: var(--ax-color-success-icon);
   }
 
   &__title {
-    margin-top: 20rpx;
-    font-size: 28rpx;
-    font-weight: 700;
+    margin-top: var(--ax-space-3);
+    font-size: var(--ax-font-size-md);
+    font-weight: var(--ax-font-weight-bold);
   }
 
   &__description {
-    margin-top: 8rpx;
-    color: #666666;
-    font-size: 22rpx;
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
   }
 }
 
 .recent-section {
-  margin-top: 38rpx;
+  margin-top: var(--ax-space-6);
 
   &__heading {
     display: flex;
+    padding: 0 var(--ax-space-1) var(--ax-space-3);
     align-items: center;
     justify-content: space-between;
-    padding: 0 8rpx 18rpx;
   }
 
   &__title {
-    font-size: 30rpx;
-    font-weight: 700;
+    font-size: var(--ax-font-size-lg);
+    font-weight: var(--ax-font-weight-bold);
   }
 
   &__more {
-    color: #999999;
-    font-size: 23rpx;
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
   }
 }
 
 .recent-file {
+  .ax-card();
   display: flex;
-  min-height: 126rpx;
-  padding: 24rpx;
+  box-sizing: border-box;
+  min-height: 128rpx;
+  padding: var(--ax-space-4);
   align-items: center;
-  background: #ffffff;
-  border-radius: 28rpx;
-  box-shadow: 0 18rpx 46rpx rgba(60, 67, 99, 0.06);
 
   &__icon {
     display: flex;
-    width: 70rpx;
-    height: 70rpx;
+    width: 72rpx;
+    height: 72rpx;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    color: #e64340;
-    font-size: 19rpx;
-    font-weight: 700;
-    background: #fff1f0;
-    border-radius: 20rpx;
+    color: var(--ax-color-danger-icon);
+    background: var(--ax-color-danger-bg);
+    border-radius: var(--ax-radius-md);
   }
 
   &__content {
     display: flex;
     min-width: 0;
-    margin-left: 22rpx;
+    margin-left: var(--ax-space-4);
     flex: 1;
     flex-direction: column;
   }
 
   &__name {
-    overflow: hidden;
-    font-size: 27rpx;
-    font-weight: 600;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    .ax-ellipsis();
+    font-size: var(--ax-font-size-base);
+    font-weight: var(--ax-font-weight-semibold);
   }
 
   &__meta {
-    margin-top: 10rpx;
-    color: #999999;
-    font-size: 21rpx;
-  }
-
-  &__level {
-    padding: 8rpx 12rpx;
-    color: #e64340;
-    font-size: 20rpx;
-    background: #fff1f0;
-    border-radius: 999rpx;
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
   }
 
   &__arrow {
-    margin-left: 12rpx;
-    color: #b8b8b8;
-    font-size: 36rpx;
+    margin-left: var(--ax-space-2);
+    color: var(--ax-color-text-secondary);
   }
 
   &--pressed {
-    opacity: 0.86;
+    opacity: 0.84;
   }
 }

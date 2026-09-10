@@ -1,4 +1,8 @@
+import { ArrowRight, LocationF } from '@nutui/icons-react-taro'
 import { Text, View } from '@tarojs/components'
+
+import PageShell from '../../components/page-shell'
+import StatusTag from '../../components/status-tag'
 
 import './index.less'
 
@@ -27,13 +31,13 @@ const sections = [
 
 export default function RiskDetailPage() {
   return (
-    <View className="risk-detail-page">
+    <PageShell className="risk-detail-page">
       <View className="risk-detail-heading">
         <View>
           <Text className="risk-detail-heading__eyebrow">违约责任</Text>
           <Text className="risk-detail-heading__title">违约责任条款不明确</Text>
         </View>
-        <Text className="risk-detail-heading__level">高风险</Text>
+        <StatusTag tone="danger">高风险</StatusTag>
       </View>
 
       {sections.map(section => (
@@ -47,10 +51,12 @@ export default function RiskDetailPage() {
       ))}
 
       <View className="source-location">
-        <Text className="source-location__icon">⌖</Text>
+        <View className="source-location__icon">
+          <LocationF size="20" />
+        </View>
         <Text>定位原文第 3 页 · 第 7 条</Text>
-        <Text className="source-location__arrow">›</Text>
+        <ArrowRight className="source-location__arrow" size="18" />
       </View>
-    </View>
+    </PageShell>
   )
 }

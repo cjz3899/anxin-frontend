@@ -2,6 +2,7 @@ import Taro from '@tarojs/taro'
 
 import { STORAGE_KEYS } from '../constants'
 import { expireAuthSession } from './auth-expiration'
+import { createAuthorizationHeader } from './request-auth'
 
 const BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080'
 
@@ -54,7 +55,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
       data: options.data,
       header: {
         'content-type': 'application/json',
-        ...(authorization ? { authorization } : {}),
+        ...createAuthorizationHeader(authorization),
         ...options.header,
       },
       success: res => {
@@ -91,7 +92,7 @@ export function upload<T = unknown>(options: UploadOptions): Promise<T> {
       name: options.name || 'file',
       formData: options.formData,
       header: {
-        ...(authorization ? { authorization } : {}),
+        ...createAuthorizationHeader(authorization),
         ...options.header,
       },
       success: res => {

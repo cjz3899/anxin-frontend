@@ -1,5 +1,9 @@
 import Taro from '@tarojs/taro'
+import { ArrowRight, Tips, Warning } from '@nutui/icons-react-taro'
 import { Text, View } from '@tarojs/components'
+
+import PageShell from '../../components/page-shell'
+import StatusTag, { type StatusTone } from '../../components/status-tag'
 
 import './index.less'
 
@@ -12,9 +16,11 @@ const risks = [
 
 export default function ReportPage() {
   return (
-    <View className="report-page">
+    <PageShell className="report-page">
       <View className="risk-summary">
-        <View className="risk-summary__mark">!</View>
+        <View className="risk-summary__mark">
+          <Warning size="24" />
+        </View>
         <View className="risk-summary__content">
           <Text className="risk-summary__title">风险等级：高</Text>
           <Text className="risk-summary__description">识别到 5 处需重点关注的条款</Text>
@@ -53,16 +59,20 @@ export default function ReportPage() {
           >
             <View className={`risk-row__number risk-row__number--${risk.tone}`}>{risk.id}</View>
             <Text className="risk-row__title">{risk.title}</Text>
-            <Text className={`risk-row__level risk-row__level--${risk.tone}`}>{risk.level}</Text>
-            <Text className="risk-row__arrow">›</Text>
+            <StatusTag tone={(risk.tone === 'high' ? 'danger' : 'warning') as StatusTone}>
+              {risk.level}
+            </StatusTag>
+            <ArrowRight className="risk-row__arrow" size="18" />
           </View>
         ))}
       </View>
 
       <View className="report-disclaimer">
-        <Text className="report-disclaimer__icon">i</Text>
+        <View className="report-disclaimer__icon">
+          <Tips size="18" />
+        </View>
         <Text>AI 分析结果仅供参考，不构成正式法律意见。</Text>
       </View>
-    </View>
+    </PageShell>
   )
 }

@@ -1,0 +1,15 @@
+.page-shell {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: var(--ax-space-5);
+  color: var(--ax-color-text-primary);
+  background: var(--ax-color-page);
+
+  &--safe-bottom {
+    padding-bottom: calc(var(--ax-space-8) + env(safe-area-inset-bottom));
+  }
+
+  &--with-nav {
+    padding-bottom: calc(136rpx + env(safe-area-inset-bottom));
+  }
+}

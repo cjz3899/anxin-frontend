@@ -1,9 +1,6 @@
 .analysis-page {
-  box-sizing: border-box;
-  min-height: 100vh;
-  padding: 54rpx 44rpx 52rpx;
-  background:
-    radial-gradient(circle at 50% 15%, rgba(102, 126, 234, 0.1), transparent 30%), #ffffff;
+  padding: 54rpx 44rpx;
+  background: var(--ax-gradient-page), var(--ax-color-surface-subtle);
 }
 
 .analysis-main {
@@ -17,42 +14,31 @@
   }
 
   &__title {
-    margin-top: 48rpx;
-    font-size: 33rpx;
-    font-weight: 700;
+    margin-top: var(--ax-space-7);
+    font-size: var(--ax-font-size-lg);
+    font-weight: var(--ax-font-weight-bold);
   }
 
   &__file {
     max-width: 560rpx;
-    margin-top: 12rpx;
+    margin-top: var(--ax-space-2);
     overflow: hidden;
-    color: #999999;
-    font-size: 24rpx;
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 }
 
 .progress-ring {
-  display: flex;
-  width: 320rpx;
-  height: 320rpx;
-  padding: 20rpx;
-  align-items: center;
-  justify-content: center;
-  background: conic-gradient(#667eea 0deg 245deg, #dfe5ff 245deg 360deg);
-  border-radius: 50%;
-  box-shadow: 0 28rpx 68rpx rgba(102, 126, 234, 0.18);
+  margin-top: var(--ax-space-4);
+  filter: drop-shadow(var(--ax-shadow-light));
 
-  &__inner {
+  &__content {
     display: flex;
-    width: 280rpx;
-    height: 280rpx;
     align-items: center;
     flex-direction: column;
     justify-content: center;
-    background: #ffffff;
-    border-radius: 50%;
   }
 
   &__value,
@@ -61,70 +47,48 @@
   }
 
   &__value {
-    font-size: 58rpx;
-    font-weight: 700;
+    font-size: var(--ax-font-size-display);
+    font-weight: var(--ax-font-weight-bold);
   }
 
   &__label {
-    margin-top: 6rpx;
-    color: #999999;
-    font-size: 21rpx;
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
   }
 }
 
 .analysis-steps {
   width: 100%;
-  margin-top: 56rpx;
-}
+  margin-top: var(--ax-space-7);
 
-.analysis-step {
-  display: flex;
-  height: 94rpx;
-  align-items: center;
-  color: #999999;
-
-  &__marker {
-    display: flex;
-    box-sizing: border-box;
-    width: 40rpx;
-    height: 40rpx;
-    align-items: center;
-    justify-content: center;
-    border: 2rpx solid currentColor;
-    border-radius: 50%;
+  .nut-step {
+    min-height: 96rpx;
   }
 
-  &__label {
-    margin-left: 26rpx;
-    flex: 1;
-    color: #333333;
-    font-size: 28rpx;
+  .nut-step-title {
+    color: var(--ax-color-text-primary);
+    font-size: var(--ax-font-size-md);
   }
 
-  &__state {
-    font-size: 23rpx;
-  }
-
-  &--done {
-    color: #07c160;
-  }
-
-  &--active {
-    color: #667eea;
+  .nut-step-description {
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
   }
 }
 
 .analysis-note {
   display: flex;
-  margin-top: 32rpx;
-  padding: 28rpx;
-  gap: 20rpx;
-  color: #667eea;
-  background: #eef4ff;
-  border-radius: 26rpx;
+  margin-top: var(--ax-space-5);
+  padding: var(--ax-space-4);
+  gap: var(--ax-space-3);
+  color: var(--ax-color-info-text);
+  background: var(--ax-color-info-bg);
+  border-radius: var(--ax-radius-lg);
 
   &__icon {
-    font-size: 36rpx;
+    display: flex;
+    flex: 0 0 auto;
   }
 
   &__title,
@@ -133,24 +97,17 @@
   }
 
   &__title {
-    font-size: 25rpx;
-    font-weight: 600;
+    font-size: var(--ax-font-size-base);
+    font-weight: var(--ax-font-weight-semibold);
   }
 
   &__description {
-    margin-top: 8rpx;
-    color: #7d89bb;
-    font-size: 22rpx;
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
   }
 }
 
 .analysis-back {
-  margin-top: 30rpx;
-  color: #667eea;
-  font-size: 25rpx;
-  text-align: center;
-
-  &--pressed {
-    opacity: 0.6;
-  }
+  margin-top: var(--ax-space-4);
 }

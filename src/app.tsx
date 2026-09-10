@@ -1,6 +1,11 @@
 import { PropsWithChildren } from 'react'
 import { useLaunch } from '@tarojs/taro'
-import '@nutui/nutui-react-taro/dist/style.css'
+import '@nutui/icons-react-taro/dist/style_icon.css'
+import '@nutui/nutui-react-taro/dist/es/packages/button/style/css'
+import '@nutui/nutui-react-taro/dist/es/packages/circleprogress/style/css'
+import '@nutui/nutui-react-taro/dist/es/packages/empty/style/css'
+import '@nutui/nutui-react-taro/dist/es/packages/steps/style/css'
+import '@nutui/nutui-react-taro/dist/es/packages/tabbar/style/css'
 
 import './app.less'
 
