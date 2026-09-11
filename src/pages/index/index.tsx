@@ -1,8 +1,10 @@
 import { Category, Message, Order, ShieldCheck } from '@nutui/icons-react-taro'
 import { Image, Text, View } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 
 import AppButton from '../../components/app-button'
 import PageShell from '../../components/page-shell'
+import { getCustomNavigationTopPadding } from '../../utils/custom-navigation'
 import { openProtectedPage } from '../../utils/protected-navigation'
 import homeHeroImage from '../../assets/document-risk-assistant-icon.svg'
 
@@ -17,9 +19,17 @@ const featureIcons = {
 }
 
 export default function Home() {
+  const systemInfo = Taro.getSystemInfoSync()
+  const menuButton = Taro.getMenuButtonBoundingClientRect()
+  const immersiveHeaderPadding = getCustomNavigationTopPadding({
+    menuBottom: menuButton?.bottom,
+    statusBarHeight: systemInfo.statusBarHeight ?? 0,
+    windowWidth: systemInfo.windowWidth,
+  })
+
   return (
     <PageShell bottomNav="home" className="home-page">
-      <View className="home-immersive-header">
+      <View className="home-immersive-header" style={{ paddingTop: immersiveHeaderPadding }}>
         <View className="home-header">
           <View className="home-header__identity">
             <View className="home-header__brand-icon">
