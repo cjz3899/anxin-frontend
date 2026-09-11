@@ -2,34 +2,21 @@ import Taro from '@tarojs/taro'
 import { Home, Order, User } from '@nutui/icons-react-taro'
 import Tabbar from '@nutui/nutui-react-taro/dist/es/packages/tabbar'
 
-import { openProtectedPage } from '../../utils/protected-navigation'
+import { bottomNavItems, createBottomNavHandler, type BottomNavKey } from './controller'
 
-export type BottomNavKey = 'home' | 'files' | 'mine'
+export type { BottomNavKey } from './controller'
 
 export interface BottomNavProps {
   active: BottomNavKey
 }
 
-const items = [
-  { key: 'home', icon: Home, label: '首页', url: '/pages/index/index' },
-  { key: 'files', icon: Order, label: '文件', url: '/pages/files/index' },
-  { key: 'mine', icon: User, label: '我的', url: '/pages/mine/index' },
-]
+const icons = { home: Home, files: Order, mine: User }
 
 export default function BottomNav({ active }: BottomNavProps) {
-  const activeIndex = items.findIndex(item => item.key === active)
-
-  const handleNavigate = (index: number) => {
-    const item = items[index]
-    if (!item) return
-    const { key, url } = item
-    if (key === active) return
-    if (key === 'home') {
-      void Taro.reLaunch({ url })
-      return
-    }
-    void openProtectedPage(url, 'reLaunch')
-  }
+  const activeIndex = bottomNavItems.findIndex(item => item.key === active)
+  const handleNavigate = createBottomNavHandler(active, url => {
+    void Taro.reLaunch({ url })
+  })
 
   return (
     <Tabbar
@@ -41,9 +28,10 @@ export default function BottomNav({ active }: BottomNavProps) {
       value={activeIndex}
       onSwitch={handleNavigate}
     >
-      {items.map(item => (
-        <Tabbar.Item icon={<item.icon size="22" />} key={item.key} title={item.label} />
-      ))}
+      {bottomNavItems.map(item => {
+        const Icon = icons[item.key]
+        return <Tabbar.Item icon={<Icon size="22" />} key={item.key} title={item.label} />
+      })}
     </Tabbar>
   )
 }
