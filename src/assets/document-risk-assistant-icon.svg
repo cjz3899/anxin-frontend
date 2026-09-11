@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="280" viewBox="0 0 560 280" fill="none">
+  <defs>
+    <linearGradient id="paper" x1="176" y1="42" x2="384" y2="248" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF5FF"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="366" y1="94" x2="450" y2="206" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3D9BFF"/>
+      <stop offset="1" stop-color="#116AE8"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="419" y1="178" x2="500" y2="252" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4CA7FF"/>
+      <stop offset="1" stop-color="#176DE4"/>
+    </linearGradient>
+    <linearGradient id="building" x1="84" y1="104" x2="184" y2="248" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0F0FF"/>
+      <stop offset="1" stop-color="#BBDFFF"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(362 158) rotate(138) scale(129 114)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4EBFF" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#D4EBFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="120" y="16" width="390" height="260" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#7AAFE5" flood-opacity=".24"/>
+    </filter>
+    <filter id="shieldShadow" x="338" y="72" width="142" height="166" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#1C72D7" flood-opacity=".3"/>
+    </filter>
+  </defs>
+
+  <!-- soft halo -->
+  <ellipse cx="342" cy="166" rx="155" ry="112" fill="url(#halo)"/>
+
+  <!-- distant abstract buildings -->
+  <rect x="47" y="154" width="58" height="94" rx="13" fill="#EAF5FF"/>
+  <rect x="85" y="112" width="78" height="136" rx="14" fill="url(#building)"/>
+  <rect x="118" y="143" width="80" height="105" rx="10" fill="#CBE6FF"/>
+  <rect x="420" y="105" width="60" height="143" rx="10" fill="#E1F1FF"/>
+  <rect x="468" y="44" width="43" height="204" rx="9" fill="#D7EBFF"/>
+  <rect x="63" y="219" width="18" height="29" rx="3" fill="#67AFFF"/>
+
+  <!-- rear sheet -->
+  <g filter="url(#shadow)">
+    <path d="M151 91C151 81.06 159.06 73 169 73H321L357 109V239C357 248.94 348.94 257 339 257H169C159.06 257 151 248.94 151 239V91Z" fill="#E4F2FF"/>
+    <path d="M321 73V100C321 109.94 329.06 118 339 118H357" fill="#C8E5FF"/>
+  </g>
+
+  <!-- main document -->
+  <g filter="url(#shadow)">
+    <path d="M184 49C184 38.51 192.51 30 203 30H348L393 75V236C393 246.49 384.49 255 374 255H203C192.51 255 184 246.49 184 236V49Z" fill="url(#paper)"/>
+    <path d="M348 30V58C348 68.49 356.51 77 367 77H393" fill="#DCEEFF"/>
+  </g>
+
+  <!-- document content -->
+  <rect x="222" y="70" width="72" height="11" rx="5.5" fill="#8DC4FF"/>
+  <rect x="306" y="70" width="55" height="11" rx="5.5" fill="#C5E3FF"/>
+  <rect x="222" y="105" width="125" height="11" rx="5.5" fill="#BDDFFF"/>
+  <rect x="222" y="137" width="105" height="11" rx="5.5" fill="#92C8FF"/>
+  <rect x="222" y="169" width="121" height="11" rx="5.5" fill="#B7DBFF"/>
+  <rect x="222" y="201" width="87" height="11" rx="5.5" fill="#87C0FB"/>
+  <rect x="222" y="225" width="119" height="9" rx="4.5" fill="#D3E9FF"/>
+
+  <!-- magnifier behind shield -->
+  <g>
+    <circle cx="431" cy="174" r="40" stroke="url(#glass)" stroke-width="16"/>
+    <path d="M459 205L497 243" stroke="url(#glass)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M462 209L493 240" stroke="#0D62D8" stroke-width="8" stroke-linecap="round" opacity=".25"/>
+  </g>
+
+  <!-- shield -->
+  <g filter="url(#shieldShadow)">
+    <path d="M397 87L450 108V150C450 185.4 429.6 211.8 397 225C364.4 211.8 344 185.4 344 150V108L397 87Z" fill="#FFFFFF"/>
+    <path d="M397 98L439 115V149C439 177.9 422.9 199.5 397 211C371.1 199.5 355 177.9 355 149V115L397 98Z" fill="url(#shield)"/>
+    <path d="M378 151L391 164L417 136" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- base accents -->
+  <path d="M112 248H491" stroke="#DCEEFF" stroke-width="3" stroke-linecap="round"/>
+  <path d="M110 218L138 196V248H110V218Z" fill="#5CA9FA" opacity=".9"/>
+</svg>
