@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 const RAW_COLOR_PATTERN = /#[\da-f]{3,8}\b|(?:rgb|hsl)a?\([^)]*\)/gi
 const FULL_NUTUI_STYLE_PATTERN = /@nutui\/nutui-react-taro\/dist\/style(?:\.css)?/g
+const UNSUPPORTED_WXSS_SELECTOR_PATTERN = /^\s*\*(?=\s*(?:,|::?|{))/gm
 
 export function findRawColorViolations(source) {
   return Array.from(source.matchAll(RAW_COLOR_PATTERN), match => ({
@@ -16,6 +17,13 @@ export function findForbiddenNutuiImports(source) {
   return Array.from(source.matchAll(FULL_NUTUI_STYLE_PATTERN), match => ({
     index: match.index ?? 0,
     value: match[0],
+  }))
+}
+
+export function findUnsupportedWxssSelectors(source) {
+  return Array.from(source.matchAll(UNSUPPORTED_WXSS_SELECTOR_PATTERN), match => ({
+    index: match.index ?? 0,
+    value: match[0].trim(),
   }))
 }
 
@@ -43,6 +51,12 @@ export async function checkDesignSystem(projectRoot = process.cwd()) {
     if (file.endsWith('.less') && !relativePath.startsWith('src/styles/')) {
       for (const match of findRawColorViolations(source)) {
         violations.push(`${relativePath}: raw color ${match.value}`)
+      }
+    }
+
+    if (file.endsWith('.less')) {
+      for (const match of findUnsupportedWxssSelectors(source)) {
+        violations.push(`${relativePath}: unsupported WXSS selector ${match.value}`)
       }
     }
 

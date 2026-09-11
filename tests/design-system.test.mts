@@ -31,3 +31,20 @@ test('当前业务源码符合设计系统约束', async () => {
 
   assert.deepEqual(await checkDesignSystem(), [])
 })
+
+test('WXSS 禁止使用微信开发者工具无法解析的通配选择器', async () => {
+  const { findUnsupportedWxssSelectors } = await loadRules()
+
+  assert.equal(
+    findUnsupportedWxssSelectors(
+      '@media (prefers-reduced-motion: reduce) {\n  *,\n  *::before {}\n}'
+    ).length,
+    2
+  )
+  assert.equal(
+    findUnsupportedWxssSelectors(
+      '@media (prefers-reduced-motion: reduce) {\n  .app-button,\n  .drop-zone {}\n}'
+    ).length,
+    0
+  )
+})
