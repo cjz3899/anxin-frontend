@@ -18,9 +18,18 @@ export interface UpdateProfilePayload {
   avatar?: string
 }
 
+export interface LoginOptions {
+  showError?: boolean
+}
+
 /** 微信登录：用 wx.login 拿到的临时凭证 code 换双 Token */
-export function login(code: string): Promise<LoginResult> {
-  return request<LoginResult>({ url: '/api/user/login', method: 'POST', data: { code } })
+export function login(code: string, options: LoginOptions = {}): Promise<LoginResult> {
+  return request<LoginResult>({
+    url: '/api/user/login',
+    method: 'POST',
+    data: { code },
+    showError: options.showError,
+  })
 }
 
 /** 退出登录 */

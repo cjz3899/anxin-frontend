@@ -3,23 +3,21 @@ import Taro from '@tarojs/taro'
 import { STORAGE_KEYS } from '../constants'
 import { expireAuthSession } from './auth-expiration'
 import { createAuthorizationHeader } from './request-auth'
+import { getErrorMessage, parseApiResponse, type ApiResponse } from './request-core'
+
+export type { ApiResponse } from './request-core'
 
 const BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080'
 
 /** 业务码：后端约定 10005 与 HTTP 401 同义，表示登录过期 */
 const AUTH_EXPIRED_CODE = 10005
 
-export interface ApiResponse<T = unknown> {
-  code: number
-  data: T
-  msg?: string
-}
-
 export interface RequestOptions {
   url: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   data?: any
   header?: Record<string, string>
+  showError?: boolean
 }
 
 export interface UploadOptions {
@@ -28,6 +26,7 @@ export interface UploadOptions {
   name?: string
   formData?: Record<string, any>
   header?: Record<string, string>
+  showError?: boolean
 }
 
 function isAuthExpired(code: number): boolean {
@@ -39,6 +38,12 @@ function handleAuthExpired() {
     removeStorage: key => Taro.removeStorageSync(key),
     notify: title => Taro.showToast({ title, icon: 'none' }),
   })
+}
+
+function showRequestError(options: { showError?: boolean }, title: string) {
+  if (options.showError !== false) {
+    Taro.showToast({ title, icon: 'none' })
+  }
 }
 
 /**
@@ -59,19 +64,24 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
         ...options.header,
       },
       success: res => {
-        const body = res.data as ApiResponse<T>
-        if (body.code === 1) {
-          resolve(body.data)
-        } else if (isAuthExpired(body.code)) {
-          handleAuthExpired()
-          reject(body)
-        } else {
-          Taro.showToast({ title: body.msg || '请求失败', icon: 'none' })
-          reject(body)
+        try {
+          const body = parseApiResponse<T>(res.data)
+          if (body.code === 1) {
+            resolve(body.data)
+          } else if (isAuthExpired(body.code)) {
+            handleAuthExpired()
+            reject(body)
+          } else {
+            showRequestError(options, body.msg || '请求失败')
+            reject(body)
+          }
+        } catch (error) {
+          showRequestError(options, getErrorMessage(error, '请求失败'))
+          reject(error)
         }
       },
       fail: err => {
-        Taro.showToast({ title: '网络错误', icon: 'none' })
+        showRequestError(options, '网络错误')
         reject(err)
       },
     })
@@ -98,10 +108,10 @@ export function upload<T = unknown>(options: UploadOptions): Promise<T> {
       success: res => {
         let body: ApiResponse<T>
         try {
-          body = JSON.parse(res.data) as ApiResponse<T>
-        } catch (e) {
-          Taro.showToast({ title: '上传响应解析失败', icon: 'none' })
-          reject(e)
+          body = parseApiResponse<T>(JSON.parse(res.data))
+        } catch (error) {
+          showRequestError(options, '上传响应解析失败')
+          reject(error)
           return
         }
         if (body.code === 1) {
