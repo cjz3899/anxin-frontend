@@ -19,54 +19,58 @@ const featureIcons = {
 export default function Home() {
   return (
     <PageShell bottomNav="home" className="home-page">
-      <View className="home-header">
-        <View className="home-header__identity">
-          <View className="home-header__brand-icon">
-            <ShieldCheck size="32" />
+      <View className="home-immersive-header">
+        <View className="home-header">
+          <View className="home-header__identity">
+            <View className="home-header__brand-icon">
+              <ShieldCheck size="32" />
+            </View>
+            <View>
+              <Text className="home-header__title">文档风险助手</Text>
+              <Text className="home-header__subtitle">让复杂的文件变得简单</Text>
+            </View>
           </View>
-          <View>
-            <Text className="home-header__title">文档风险助手</Text>
-            <Text className="home-header__subtitle">让复杂的文件变得简单</Text>
-          </View>
+        </View>
+
+        <View className="home-illustration">
+          <Image className="home-illustration__image" mode="widthFix" src={homeHeroImage} />
         </View>
       </View>
 
-      <View className="home-illustration">
-        <Image className="home-illustration__image" mode="widthFix" src={homeHeroImage} />
-      </View>
+      <View className="home-actions">
+        <AppButton
+          className="home-upload-action"
+          variant="primary"
+          onClick={() => void openProtectedPage('/pages/upload/index')}
+        >
+          <View className="home-upload-action__content">
+            <Text className="home-upload-action__title">上传文件</Text>
+            <Text className="home-upload-action__description">支持 PDF、Word、图片等格式</Text>
+          </View>
+        </AppButton>
 
-      <AppButton
-        className="home-upload-action"
-        variant="primary"
-        onClick={() => void openProtectedPage('/pages/upload/index')}
-      >
-        <View className="home-upload-action__content">
-          <Text className="home-upload-action__title">上传文件</Text>
-          <Text className="home-upload-action__description">支持 PDF、Word、图片等格式</Text>
-        </View>
-      </AppButton>
+        <View className="home-feature-grid">
+          {homeFeatures.map(feature => {
+            const Icon = featureIcons[feature.id]
 
-      <View className="home-feature-grid">
-        {homeFeatures.map(feature => {
-          const Icon = featureIcons[feature.id]
-
-          return (
-            <AppButton
-              className={`home-feature-card home-feature-card--${feature.tone}`}
-              key={feature.id}
-              variant="ghost"
-              onClick={() => void openProtectedPage(feature.url)}
-            >
-              <View className="home-feature-card__content">
-                <View className="home-feature-card__icon">
-                  <Icon size="34" />
+            return (
+              <AppButton
+                className={`home-feature-card home-feature-card--${feature.tone}`}
+                key={feature.id}
+                variant="ghost"
+                onClick={() => void openProtectedPage(feature.url)}
+              >
+                <View className="home-feature-card__content">
+                  <View className="home-feature-card__icon">
+                    <Icon size="34" />
+                  </View>
+                  <Text className="home-feature-card__title">{feature.title}</Text>
+                  <Text className="home-feature-card__description">{feature.description}</Text>
                 </View>
-                <Text className="home-feature-card__title">{feature.title}</Text>
-                <Text className="home-feature-card__description">{feature.description}</Text>
-              </View>
-            </AppButton>
-          )
-        })}
+              </AppButton>
+            )
+          })}
+        </View>
       </View>
     </PageShell>
   )

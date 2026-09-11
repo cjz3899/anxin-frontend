@@ -1,6 +1,15 @@
 .home-page {
-  padding-top: var(--ax-space-6);
-  background: var(--ax-color-brand-soft);
+  padding: 0;
+  background: var(--ax-color-page);
+
+  &.page-shell--with-nav {
+    padding-bottom: calc(136rpx + env(safe-area-inset-bottom));
+  }
+}
+
+.home-immersive-header {
+  padding: calc(env(safe-area-inset-top) + var(--ax-space-6)) var(--ax-space-5) var(--ax-space-6);
+  background: var(--ax-gradient-hero);
 }
 
 .home-header {
@@ -48,7 +57,7 @@
 .home-illustration {
   display: flex;
   min-height: 294rpx;
-  margin: var(--ax-space-4) 0 var(--ax-space-5);
+  margin: var(--ax-space-4) 0 0;
   align-items: center;
   justify-content: center;
 
@@ -57,13 +66,18 @@
   }
 }
 
+.home-actions {
+  padding: var(--ax-space-5);
+}
+
 .home-upload-action {
-  height: 170rpx;
+  height: var(--ax-size-home-upload-action);
   padding: 0 var(--ax-space-5);
   color: var(--ax-color-text-inverse) !important;
   background: var(--ax-gradient-brand) !important;
   border-color: var(--ax-color-brand) !important;
-  box-shadow: var(--ax-shadow-light);
+  border-radius: var(--ax-radius-xl);
+  box-shadow: var(--ax-shadow-floating);
 
   &__content,
   &__title,
@@ -97,11 +111,12 @@
 }
 
 .home-feature-card {
-  min-height: 222rpx;
+  min-height: var(--ax-size-home-feature-card);
   padding: var(--ax-space-5);
   text-align: left;
   border: 1rpx solid var(--ax-color-border);
-  box-shadow: none;
+  border-radius: var(--ax-radius-xl);
+  box-shadow: var(--ax-shadow-light);
 
   &__content,
   &__icon,
