@@ -23,7 +23,7 @@
     "check:design-system": "node scripts/design-system-rules.mjs",
     "check:weapp-runtime": "node scripts/check-weapp-runtime.mjs",
     "check:weapp-size": "node scripts/check-weapp-size.mjs",
-    "verify": "pnpm typecheck && pnpm test && pnpm lint && pnpm check:design-system && pnpm build:weapp:prod && pnpm check:weapp-runtime && pnpm check:weapp-size",
+    "verify": "pnpm typecheck && pnpm test && pnpm lint && pnpm check:design-system && pnpm build:weapp && pnpm check:weapp-runtime && pnpm check:weapp-size",
     "format": "prettier --write .",
     "prepare": "husky"
   },
