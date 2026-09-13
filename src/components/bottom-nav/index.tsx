@@ -15,7 +15,7 @@ const icons = { home: Home, files: Order, mine: User }
 export default function BottomNav({ active }: BottomNavProps) {
   const activeIndex = bottomNavItems.findIndex(item => item.key === active)
   const handleNavigate = createBottomNavHandler(active, url => {
-    void Taro.reLaunch({ url })
+    void Taro.redirectTo({ url })
   })
 
   return (
