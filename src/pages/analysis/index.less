@@ -1,0 +1,113 @@
+.analysis-page {
+  padding: 54rpx 44rpx;
+  background: var(--ax-gradient-page), var(--ax-color-surface-subtle);
+}
+
+.analysis-main {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  &__title,
+  &__file {
+    display: block;
+  }
+
+  &__title {
+    margin-top: var(--ax-space-7);
+    font-size: var(--ax-font-size-lg);
+    font-weight: var(--ax-font-weight-bold);
+  }
+
+  &__file {
+    max-width: 560rpx;
+    margin-top: var(--ax-space-2);
+    overflow: hidden;
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.progress-ring {
+  margin-top: var(--ax-space-4);
+  filter: drop-shadow(var(--ax-shadow-light));
+
+  &__content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  &__value,
+  &__label {
+    display: block;
+  }
+
+  &__value {
+    font-size: var(--ax-font-size-display);
+    font-weight: var(--ax-font-weight-bold);
+  }
+
+  &__label {
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
+  }
+}
+
+.analysis-steps {
+  width: 100%;
+  margin-top: var(--ax-space-7);
+
+  .nut-step {
+    min-height: 96rpx;
+  }
+
+  .nut-step-title {
+    color: var(--ax-color-text-primary);
+    font-size: var(--ax-font-size-md);
+  }
+
+  .nut-step-description {
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
+  }
+}
+
+.analysis-note {
+  display: flex;
+  margin-top: var(--ax-space-5);
+  padding: var(--ax-space-4);
+  gap: var(--ax-space-3);
+  color: var(--ax-color-info-text);
+  background: var(--ax-color-info-bg);
+  border-radius: var(--ax-radius-lg);
+
+  &__icon {
+    display: flex;
+    flex: 0 0 auto;
+  }
+
+  &__title,
+  &__description {
+    display: block;
+  }
+
+  &__title {
+    font-size: var(--ax-font-size-base);
+    font-weight: var(--ax-font-weight-semibold);
+  }
+
+  &__description {
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
+  }
+}
+
+.analysis-back {
+  margin-top: var(--ax-space-4);
+}

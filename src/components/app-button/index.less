@@ -1,0 +1,44 @@
+.app-button {
+  min-height: var(--ax-size-touch);
+  font-size: var(--ax-font-size-md);
+  font-weight: var(--ax-font-weight-semibold);
+  transition:
+    opacity var(--ax-duration-fast) ease,
+    transform var(--ax-duration-fast) ease;
+
+  &--primary {
+    color: var(--ax-color-text-inverse);
+    background: var(--ax-gradient-brand);
+    border-color: var(--ax-color-brand);
+    box-shadow: var(--ax-shadow-light);
+  }
+
+  &--secondary {
+    color: var(--ax-color-brand);
+    background: var(--ax-color-surface);
+    border-color: var(--ax-color-brand);
+  }
+
+  &--ghost {
+    color: var(--ax-color-brand);
+    background: transparent;
+  }
+
+  &--danger {
+    color: var(--ax-color-text-inverse);
+    background: var(--ax-color-danger-icon);
+    border-color: var(--ax-color-danger-icon);
+  }
+
+  &.nut-button-disabled {
+    color: var(--ax-color-text-secondary);
+    background: var(--ax-color-border-strong);
+    border-color: var(--ax-color-border-strong);
+    box-shadow: none;
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import Taro, { useLoad } from '@tarojs/taro'
-import { View, Text, Button, Input, ScrollView } from '@tarojs/components'
+import { Input, ScrollView, Text, View } from '@tarojs/components'
 
+import AppButton from '../../components/app-button'
+import PageShell from '../../components/page-shell'
 import { login, logout, refresh, updateProfile, uploadAvatar, UserProfile } from '../../services'
 import { STORAGE_KEYS } from '../../constants'
 
@@ -213,7 +215,7 @@ export default function Test() {
   }
 
   return (
-    <View className="test">
+    <PageShell className="test">
       <View className="test__header">
         <Text className="test__title">接口测试</Text>
         <Text className="test__subtitle">微信登录 → 头像上传 → 资料保存</Text>
@@ -221,20 +223,31 @@ export default function Test() {
 
       <View className="test__body">
         <View className="test__section">
-          <Button className="test__btn" onClick={onLogin} loading={loggingIn} disabled={loggingIn}>
-            {loggedIn ? '重新登录' : '微信一键登录'}
-          </Button>
-          <Button className="test__btn" onClick={onLogout} disabled={!loggedIn}>
-            退出登录
-          </Button>
-          <Button
+          <AppButton
             className="test__btn"
-            onClick={onRefresh}
-            loading={refreshing}
+            disabled={loggingIn}
+            loading={loggingIn}
+            onClick={onLogin}
+          >
+            {loggedIn ? '重新登录' : '微信一键登录'}
+          </AppButton>
+          <AppButton
+            className="test__btn"
+            disabled={!loggedIn}
+            variant="secondary"
+            onClick={onLogout}
+          >
+            退出登录
+          </AppButton>
+          <AppButton
+            className="test__btn"
             disabled={refreshing || !loggedIn}
+            loading={refreshing}
+            variant="secondary"
+            onClick={onRefresh}
           >
             刷新 Token
-          </Button>
+          </AppButton>
         </View>
 
         <View className="test__info">
@@ -244,17 +257,22 @@ export default function Test() {
         </View>
 
         <View className="test__section">
-          <Button className="test__btn" openType="chooseAvatar" onChooseAvatar={onChooseAvatar}>
-            选择头像
-          </Button>
-          <Button
+          <AppButton
             className="test__btn"
-            onClick={onUploadAvatar}
-            loading={uploading}
+            openType="chooseAvatar"
+            variant="secondary"
+            onChooseAvatar={onChooseAvatar}
+          >
+            选择头像
+          </AppButton>
+          <AppButton
+            className="test__btn"
             disabled={uploading || !loggedIn}
+            loading={uploading}
+            onClick={onUploadAvatar}
           >
             上传头像
-          </Button>
+          </AppButton>
           <Input
             className="test__input"
             type="nickname"
@@ -262,14 +280,14 @@ export default function Test() {
             value={nickname}
             onInput={onNicknameInput}
           />
-          <Button
+          <AppButton
             className="test__btn"
-            onClick={onSaveProfile}
-            loading={saving}
             disabled={saving || !loggedIn}
+            loading={saving}
+            onClick={onSaveProfile}
           >
             保存资料
-          </Button>
+          </AppButton>
         </View>
 
         <Text className="test__status">{avatarStatus}</Text>
@@ -277,9 +295,9 @@ export default function Test() {
         <View className="test__section">
           <View className="test__log-title">
             <Text>运行日志</Text>
-            <Button size="mini" onClick={onClearLog}>
+            <AppButton block={false} className="test__clear" variant="ghost" onClick={onClearLog}>
               清空
-            </Button>
+            </AppButton>
           </View>
           <ScrollView className="test__log" scrollY>
             {logs.map((item, i) => (
@@ -292,6 +310,6 @@ export default function Test() {
           </ScrollView>
         </View>
       </View>
-    </View>
+    </PageShell>
   )
 }

@@ -1,0 +1,46 @@
+.empty-page {
+  box-sizing: border-box;
+  display: flex;
+  min-height: calc(100vh - 128rpx);
+  padding: var(--ax-space-8) var(--ax-space-5) 160rpx;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  background: var(--ax-gradient-page), var(--ax-color-page);
+
+  &__icon {
+    display: flex;
+    width: 152rpx;
+    height: 152rpx;
+    align-items: center;
+    justify-content: center;
+    color: var(--ax-color-brand);
+    font-size: var(--ax-font-size-display);
+    background: var(--ax-color-brand-soft);
+    border: 1rpx solid var(--ax-color-brand-subtle);
+    border-radius: var(--ax-radius-xl);
+  }
+
+  .nut-empty {
+    padding: 0;
+  }
+
+  .nut-empty-title {
+    margin-top: var(--ax-space-7);
+    font-size: var(--ax-font-size-xl);
+    font-weight: var(--ax-font-weight-bold);
+  }
+
+  .nut-empty-description {
+    max-width: 520rpx;
+    margin-top: var(--ax-space-3);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
+    line-height: 1.7;
+  }
+
+  .status-tag {
+    margin-top: var(--ax-space-5);
+  }
+}

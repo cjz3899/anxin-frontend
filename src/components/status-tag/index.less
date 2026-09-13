@@ -1,0 +1,40 @@
+.status-tag {
+  display: inline-flex;
+  min-height: 40rpx;
+  padding: 4rpx 14rpx;
+  align-items: center;
+  gap: var(--ax-space-1);
+  font-size: var(--ax-font-size-xs);
+  font-weight: var(--ax-font-weight-medium);
+  border-radius: var(--ax-radius-pill);
+
+  &__icon {
+    display: flex;
+    align-items: center;
+  }
+
+  &--danger {
+    color: var(--ax-color-danger-text);
+    background: var(--ax-color-danger-bg);
+  }
+
+  &--warning {
+    color: var(--ax-color-warning-text);
+    background: var(--ax-color-warning-bg);
+  }
+
+  &--success {
+    color: var(--ax-color-success-text);
+    background: var(--ax-color-success-bg);
+  }
+
+  &--info {
+    color: var(--ax-color-info-text);
+    background: var(--ax-color-info-bg);
+  }
+
+  &--neutral {
+    color: var(--ax-color-neutral-text);
+    background: var(--ax-color-neutral-bg);
+  }
+}

@@ -1,3 +1,4 @@
 export default definePageConfig({
-  navigationBarTitleText: '安心文档分析',
+  navigationBarTitleText: '文档风险助手',
+  navigationStyle: 'custom',
 })
