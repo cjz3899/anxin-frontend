@@ -1,0 +1,199 @@
+@import '../../styles/mixins.less';
+
+.files-page {
+  padding-top: 0;
+}
+
+.files-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  margin: 0 calc(-1 * var(--ax-space-5));
+  background: var(--ax-color-page);
+
+  &__item {
+    position: relative;
+    display: flex;
+    min-height: 96rpx;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+
+    &--pressed {
+      opacity: 0.7;
+    }
+  }
+
+  &__label {
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-md);
+    font-weight: var(--ax-font-weight-medium);
+    transition: color var(--ax-duration-base) ease;
+  }
+
+  &__item--active &__label {
+    color: var(--ax-color-brand);
+    font-weight: var(--ax-font-weight-semibold);
+  }
+
+  &__underline {
+    position: absolute;
+    bottom: 10rpx;
+    left: 50%;
+    width: 48rpx;
+    height: 6rpx;
+    background: var(--ax-color-brand);
+    border-radius: var(--ax-radius-pill);
+    transform: translateX(-50%) scaleX(0);
+    transition: transform var(--ax-duration-base) ease;
+  }
+
+  &__item--active &__underline {
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ax-space-2);
+  margin-top: var(--ax-space-3);
+}
+
+.file-card {
+  .ax-card();
+  display: flex;
+  align-items: center;
+  padding: var(--ax-space-3);
+  gap: var(--ax-space-3);
+  transition:
+    background var(--ax-duration-fast) ease,
+    transform var(--ax-duration-fast) ease;
+
+  &--pressed {
+    background: var(--ax-color-surface-subtle);
+    transform: scale(0.985);
+  }
+
+  &__icon {
+    display: flex;
+    flex: 0 0 auto;
+    width: 88rpx;
+    height: 88rpx;
+    align-items: center;
+    justify-content: center;
+    color: var(--ax-color-text-inverse);
+    border-radius: var(--ax-radius-md);
+
+    &--pdf {
+      background: var(--ax-color-danger-icon);
+    }
+
+    &--word {
+      background: var(--ax-color-brand);
+    }
+
+    &--image {
+      background: var(--ax-color-success-icon);
+    }
+
+    &--other {
+      background: var(--ax-color-neutral-icon);
+    }
+
+    &--skeleton {
+      background: var(--ax-color-surface-subtle);
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--ax-space-1);
+  }
+
+  &__name {
+    .ax-ellipsis();
+    color: var(--ax-color-text-primary);
+    font-size: var(--ax-font-size-lg);
+    font-weight: var(--ax-font-weight-semibold);
+  }
+
+  &__time {
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__arrow {
+    display: flex;
+    flex: 0 0 auto;
+    color: var(--ax-color-text-disabled);
+  }
+}
+
+.file-skeleton-line {
+  height: 28rpx;
+  background: var(--ax-color-neutral-bg);
+  border-radius: var(--ax-radius-sm);
+
+  &--name {
+    width: 60%;
+  }
+
+  &--time {
+    width: 40%;
+    height: 24rpx;
+  }
+}
+
+.files-state {
+  display: flex;
+  min-height: 56vh;
+  padding: var(--ax-space-8) var(--ax-space-5);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  &__icon {
+    display: flex;
+    width: 152rpx;
+    height: 152rpx;
+    align-items: center;
+    justify-content: center;
+    color: var(--ax-color-brand);
+    background: var(--ax-color-brand-soft);
+    border: 1rpx solid var(--ax-color-brand-subtle);
+    border-radius: var(--ax-radius-xl);
+
+    &--error {
+      color: var(--ax-color-danger-icon);
+      background: var(--ax-color-danger-bg);
+      border-color: var(--ax-color-danger-bg);
+    }
+  }
+
+  &__title {
+    margin-top: var(--ax-space-5);
+    color: var(--ax-color-text-primary);
+    font-size: var(--ax-font-size-lg);
+    font-weight: var(--ax-font-weight-bold);
+  }
+
+  &__description {
+    max-width: 520rpx;
+    margin-top: var(--ax-space-2);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
+    line-height: 1.7;
+  }
+
+  &__action-wrap {
+    width: 320rpx;
+    margin-top: var(--ax-space-5);
+  }
+}
