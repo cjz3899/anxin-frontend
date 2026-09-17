@@ -1,0 +1,9 @@
+allowBuilds:
+  '@nutui/nutui-react-taro': false
+  '@parcel/watcher': false
+  '@swc/core': false
+  '@tarojs/binding': false
+  '@tarojs/cli': false
+  core-js: false
+  core-js-pure: false
+  esbuild: false
