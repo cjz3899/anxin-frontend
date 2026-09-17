@@ -14,7 +14,7 @@ const AUTH_EXPIRED_CODE = 10005
 
 export interface RequestOptions {
   url: string
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   data?: any
   header?: Record<string, string>
   showError?: boolean

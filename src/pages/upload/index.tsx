@@ -42,7 +42,7 @@ export default function UploadPage() {
     try {
       const result = await uploadDocument(selectedFile.path)
       await Taro.redirectTo({
-        url: `/pages/analysis/index?fileName=${encodeURIComponent(selectedFile.name)}&taskId=${result.taskId}`,
+        url: `/pages/analysis/index?taskId=${result.taskId}&documentId=${result.documentId}&fileName=${encodeURIComponent(selectedFile.name)}`,
       })
     } finally {
       setUploading(false)

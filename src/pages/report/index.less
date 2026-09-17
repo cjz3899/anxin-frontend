@@ -11,9 +11,72 @@
   padding: var(--ax-space-5);
   overflow: hidden;
   align-items: center;
-  background: var(--ax-gradient-danger);
-  border: 1rpx solid var(--ax-color-danger-icon);
   border-radius: var(--ax-radius-xl);
+
+  &--high {
+    background: var(--ax-gradient-danger);
+    border: 1rpx solid var(--ax-color-danger-icon);
+
+    .risk-summary__mark,
+    .risk-summary__score {
+      color: var(--ax-color-text-inverse);
+      background: var(--ax-color-danger-icon);
+    }
+
+    .risk-summary__title {
+      color: var(--ax-color-danger-text);
+    }
+  }
+
+  &--medium {
+    background: var(--ax-color-warning-bg);
+    border: 1rpx solid var(--ax-color-warning-icon);
+
+    .risk-summary__mark {
+      color: var(--ax-color-text-inverse);
+      background: var(--ax-color-warning-icon);
+    }
+
+    .risk-summary__score {
+      color: var(--ax-color-warning-icon);
+    }
+
+    .risk-summary__title {
+      color: var(--ax-color-warning-text);
+    }
+  }
+
+  &--low {
+    background: var(--ax-color-success-bg);
+    border: 1rpx solid var(--ax-color-success-icon);
+
+    .risk-summary__mark {
+      color: var(--ax-color-text-inverse);
+      background: var(--ax-color-success-icon);
+    }
+
+    .risk-summary__score {
+      color: var(--ax-color-success-icon);
+    }
+
+    .risk-summary__title {
+      color: var(--ax-color-success-text);
+    }
+  }
+
+  &--unknown {
+    background: var(--ax-color-neutral-bg);
+    border: 1rpx solid var(--ax-color-border);
+
+    .risk-summary__mark {
+      color: var(--ax-color-text-inverse);
+      background: var(--ax-color-neutral-icon);
+    }
+
+    .risk-summary__score {
+      color: var(--ax-color-neutral-icon);
+    }
+  }
 
   &__mark {
     display: flex;
@@ -22,8 +85,6 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    color: var(--ax-color-text-inverse);
-    background: var(--ax-color-danger-icon);
     border-radius: var(--ax-radius-pill);
   }
 
@@ -35,7 +96,6 @@
   }
 
   &__title {
-    color: var(--ax-color-danger-text);
     font-size: var(--ax-font-size-lg);
     font-weight: var(--ax-font-weight-bold);
   }
@@ -50,7 +110,6 @@
     position: absolute;
     right: -16rpx;
     bottom: -32rpx;
-    color: var(--ax-color-danger-icon);
     font-size: 150rpx;
     font-weight: var(--ax-font-weight-bold);
     opacity: 0.08;
@@ -139,6 +198,14 @@
     &--medium {
       background: var(--ax-color-warning-icon);
     }
+
+    &--low {
+      background: var(--ax-color-success-icon);
+    }
+
+    &--unknown {
+      background: var(--ax-color-neutral-icon);
+    }
   }
 
   &__title {
@@ -146,6 +213,13 @@
     margin-left: var(--ax-space-3);
     flex: 1;
     font-size: var(--ax-font-size-base);
+  }
+
+  &__count {
+    flex: 0 0 auto;
+    margin-left: var(--ax-space-2);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
   }
 
   &__arrow {
@@ -156,6 +230,18 @@
   &--pressed {
     opacity: 0.82;
   }
+}
+
+.report-empty {
+  .ax-card();
+  padding: var(--ax-space-5);
+  color: var(--ax-color-text-secondary);
+  font-size: var(--ax-font-size-base);
+  text-align: center;
+}
+
+.report-chat-action {
+  margin-top: var(--ax-space-5);
 }
 
 .report-disclaimer {

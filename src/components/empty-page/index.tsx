@@ -8,9 +8,16 @@ export interface EmptyPageProps {
   icon: ReactNode
   title: string
   description: string
+  /** 是否展示“页面建设中”标签，默认展示；接入真实数据的状态请关闭 */
+  showConstruction?: boolean
 }
 
-export default function EmptyPage({ icon, title, description }: EmptyPageProps) {
+export default function EmptyPage({
+  icon,
+  title,
+  description,
+  showConstruction = true,
+}: EmptyPageProps) {
   return (
     <View className="empty-page">
       <Empty
@@ -21,7 +28,7 @@ export default function EmptyPage({ icon, title, description }: EmptyPageProps) 
         status="empty"
         title={title}
       />
-      <StatusTag tone="info">页面建设中</StatusTag>
+      {showConstruction && <StatusTag tone="info">页面建设中</StatusTag>}
     </View>
   )
 }
