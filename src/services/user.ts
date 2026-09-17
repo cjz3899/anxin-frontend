@@ -47,6 +47,11 @@ export function updateProfile(payload: UpdateProfilePayload): Promise<UserProfil
   return request<UserProfile>({ url: '/api/user/profile', method: 'POST', data: payload })
 }
 
+/** 查询当前登录用户资料（换设备/清缓存后恢复昵称与头像） */
+export function getCurrentUser(): Promise<UserProfile> {
+  return request<UserProfile>({ url: '/api/user/me' })
+}
+
 /** 上传头像：后端校验大小/真实类型 + 微信 imgSecCheck 内容安全，返回 OSS 头像地址 */
 export function uploadAvatar(filePath: string): Promise<string> {
   return upload<{ avatar: string }>({ url: '/api/user/avatar', filePath }).then(res => res.avatar)

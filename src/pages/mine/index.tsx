@@ -13,7 +13,7 @@ import { Button, Image, Input, Text, View } from '@tarojs/components'
 
 import PageShell from '../../components/page-shell'
 import { STORAGE_KEYS } from '../../constants'
-import { updateProfile, uploadAvatar, type UserProfile } from '../../services'
+import { getCurrentUser, updateProfile, uploadAvatar, type UserProfile } from '../../services'
 import { getErrorMessage } from '../../utils/request-core'
 
 import './index.less'
@@ -36,7 +36,21 @@ export default function MinePage() {
   const [uploading, setUploading] = useState(false)
 
   useDidShow(() => {
-    setProfile(Taro.getStorageSync(STORAGE_KEYS.PROFILE) || {})
+    const cached = Taro.getStorageSync(STORAGE_KEYS.PROFILE) || {}
+    setProfile(cached)
+    // 已登录时静默拉取最新资料：换设备/清缓存后也能恢复昵称与头像
+    if (Taro.getStorageSync(STORAGE_KEYS.ACCESS_TOKEN)) {
+      getCurrentUser()
+        .then(next => {
+          if (next?.id || next?.nickname || next?.avatar) {
+            Taro.setStorageSync(STORAGE_KEYS.PROFILE, next)
+            setProfile(next)
+          }
+        })
+        .catch(() => {
+          // 拉取失败（含登录过期）保持本地缓存展示，由统一过期处理负责提示
+        })
+    }
   })
 
   const persistProfile = (next: UserProfile) => {
