@@ -6,7 +6,12 @@ import { Text, View } from '@tarojs/components'
 import EmptyPage from '../../components/empty-page'
 import PageShell from '../../components/page-shell'
 import StatusTag, { type StatusTone } from '../../components/status-tag'
-import { getDocumentList, type DocumentListItem, type DocumentStatusGroup } from '../../services'
+import {
+  getDocumentDetail,
+  getDocumentList,
+  type DocumentListItem,
+  type DocumentStatusGroup,
+} from '../../services'
 import { formatDateTime, formatFileSize } from '../../utils/format'
 import { riskLevelView } from '../../utils/risk-level'
 
@@ -50,6 +55,7 @@ export default function FilesPage() {
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [loadFailed, setLoadFailed] = useState(false)
+  const [opening, setOpening] = useState(false)
 
   const loadPage = useCallback(async (group: DocumentStatusGroup, nextCursor?: string) => {
     setLoading(true)
@@ -86,6 +92,29 @@ export default function FilesPage() {
 
   const openReport = (documentId: string) => {
     Taro.navigateTo({ url: `/pages/report/index?documentId=${documentId}` })
+  }
+
+  // 点击文件按状态分流：已完成进报告页；排队/分析中/失败回到分析页
+  // （分析页会接续轮询，失败时可重新分析），避免对未完成任务请求报告报错
+  const openDocument = (item: DocumentListItem) => {
+    if (item.status === 'SUCCESS') {
+      openReport(item.id)
+      return
+    }
+    if (opening) return
+    setOpening(true)
+    getDocumentDetail(item.id)
+      .then(detail => {
+        if (detail.latestTaskId) {
+          Taro.navigateTo({
+            url: `/pages/analysis/index?taskId=${detail.latestTaskId}&documentId=${detail.id}&fileName=${encodeURIComponent(detail.fileName)}`,
+          })
+        } else {
+          openReport(detail.id)
+        }
+      })
+      .catch(() => Taro.showToast({ title: '文件状态获取失败', icon: 'none' }))
+      .finally(() => setOpening(false))
   }
 
   return (
@@ -125,7 +154,7 @@ export default function FilesPage() {
               className="file-row"
               hoverClass="file-row--pressed"
               key={item.id}
-              onClick={() => openReport(item.id)}
+              onClick={() => openDocument(item)}
             >
               <View className={`file-row__icon file-row__icon--${type}`}>
                 <Icon size="26" />

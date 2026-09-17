@@ -113,9 +113,13 @@ export function getDocumentList(
   statusGroup: DocumentStatusGroup = 'ALL',
   cursor?: string
 ): Promise<PageResult<DocumentListItem>> {
+  // cursor 为空时不能下发 undefined：微信端 GET 会序列化成 "undefined"，
+  // 后端游标解析会直接抛参数错误，导致历史记录列表整体查询失败
+  const data: Record<string, unknown> = { pageSize, statusGroup }
+  if (cursor) data.cursor = cursor
   return request<PageResult<DocumentListItem>>({
     url: '/api/document/list',
-    data: { pageSize, statusGroup, cursor },
+    data,
   })
 }
 
