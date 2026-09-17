@@ -1,0 +1,133 @@
+@import '../../styles/mixins.less';
+
+.mine-page {
+  padding: var(--ax-space-5) 30rpx calc(var(--ax-space-8) + env(safe-area-inset-bottom));
+  background: var(--ax-gradient-hero), var(--ax-color-page);
+}
+
+.mine-header {
+  position: relative;
+  display: flex;
+  padding: var(--ax-space-7) var(--ax-space-5) var(--ax-space-6);
+  align-items: center;
+  flex-direction: column;
+  background: var(--ax-color-surface);
+  border-radius: var(--ax-radius-xl);
+  box-shadow: var(--ax-shadow-light);
+
+  &__gear {
+    position: absolute;
+    top: var(--ax-space-4);
+    right: var(--ax-space-4);
+    display: flex;
+    color: var(--ax-color-text-secondary);
+  }
+
+  &__name {
+    display: flex;
+    min-height: var(--ax-size-touch);
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    font-size: var(--ax-font-size-xl);
+    font-weight: var(--ax-font-weight-bold);
+
+    &--pressed {
+      opacity: 0.82;
+    }
+  }
+
+  &__name-hint {
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-xs);
+    font-weight: var(--ax-font-weight-regular);
+  }
+
+  &__role {
+    margin-top: var(--ax-space-1);
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
+  }
+}
+
+// 复用微信 openType=chooseAvatar 能力，重置原生按钮默认样式承载头像
+.mine-avatar-button {
+  display: flex;
+  width: 144rpx;
+  height: 144rpx;
+  padding: 0;
+  margin: 0 0 var(--ax-space-3);
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  background: var(--ax-color-brand-subtle);
+  border: none;
+  border-radius: var(--ax-radius-pill);
+
+  &::after {
+    border: none;
+  }
+
+  &__image {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ax-color-brand);
+  }
+}
+
+.mine-nickname-input {
+  width: 320rpx;
+  height: var(--ax-size-touch);
+  padding: 0 var(--ax-space-4);
+  margin-bottom: var(--ax-space-2);
+  font-size: var(--ax-font-size-lg);
+  text-align: center;
+  background: var(--ax-color-surface-subtle);
+  border-radius: var(--ax-radius-pill);
+}
+
+.mine-menu {
+  margin-top: var(--ax-space-4);
+  overflow: hidden;
+  background: var(--ax-color-surface);
+  border-radius: var(--ax-radius-xl);
+  box-shadow: var(--ax-shadow-light);
+
+  &__item {
+    display: flex;
+    min-height: var(--ax-size-touch);
+    padding: 0 var(--ax-space-4);
+    align-items: center;
+
+    &:not(:last-child) {
+      border-bottom: 1rpx solid var(--ax-color-border);
+    }
+
+    &--pressed {
+      opacity: 0.82;
+    }
+  }
+
+  &__icon {
+    display: flex;
+    margin-right: var(--ax-space-3);
+    color: var(--ax-color-brand);
+  }
+
+  &__title {
+    min-width: 0;
+    flex: 1;
+    font-size: var(--ax-font-size-base);
+  }
+
+  &__arrow {
+    color: var(--ax-color-text-secondary);
+  }
+}
