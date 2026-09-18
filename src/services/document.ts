@@ -10,8 +10,9 @@ export interface PageResult<T> {
   total: number | null
 }
 
-/** 文档状态（后端 TaskStatus 枚举名） */
-export type DocumentStatus = 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED'
+/** 文档状态（后端 TaskStatus 枚举名，兼容两版命名：PROCESSING/ANALYZING 为分析中，SUCCESS/COMPLETED 为已完成） */
+export type DocumentStatus =
+  'PENDING' | 'PROCESSING' | 'ANALYZING' | 'SUCCESS' | 'COMPLETED' | 'FAILED'
 
 /** 整体风险等级（后端由各级数量推导） */
 export type RiskLevel = 'HIGH' | 'MEDIUM' | 'LOW'
@@ -107,8 +108,50 @@ export function uploadDocument(filePath: string): Promise<DocumentUploadResult> 
   })
 }
 
-/** 文件分析状态：PENDING 排队中 / ANALYZING 分析中 / COMPLETED 已完成 / FAILED 分析失败 */
-export type DocumentStatus = 'PENDING' | 'ANALYZING' | 'COMPLETED' | 'FAILED'
+/** 查询当前用户的文件和历史分析记录（游标分页） */
+export function getDocumentList(
+  pageSize: number,
+  statusGroup: DocumentStatusGroup = 'ALL',
+  cursor?: string
+): Promise<PageResult<DocumentListItem>> {
+  return request<PageResult<DocumentListItem>>({
+    url: '/api/document/list',
+    data: { pageSize, statusGroup, cursor },
+  })
+}
+
+/** 查询单个文件详情 */
+export function getDocumentDetail(documentId: string): Promise<DocumentDetail> {
+  return request<DocumentDetail>({ url: `/api/document/${documentId}` })
+}
+
+/** 删除文件及其分析记录 */
+export function deleteDocument(documentId: string): Promise<void> {
+  return request<void>({ url: `/api/document/${documentId}`, method: 'DELETE' })
+}
+
+/** 对已有文件重新发起分析 */
+export function reanalyzeDocument(documentId: string): Promise<DocumentUploadResult> {
+  return request<DocumentUploadResult>({
+    url: `/api/document/${documentId}/reanalyze`,
+    method: 'POST',
+  })
+}
+
+/** 查询单条风险的切分报告详情 */
+export function getRiskDetail(documentId: string, riskId: string): Promise<RiskDetail> {
+  return request<RiskDetail>({ url: `/api/document/${documentId}/risks/${riskId}` })
+}
+
+/** 轮询分析任务状态（间隔 2s，SUCCESS/FAILED 后停止） */
+export function getAnalysisTask(taskId: string): Promise<AnalysisTask> {
+  return request<AnalysisTask>({ url: `/api/analysis/task/${taskId}` })
+}
+
+/** 查询风险报告（分析任务 SUCCESS 后调用） */
+export function getRiskReport(documentId: string): Promise<RiskReport> {
+  return request<RiskReport>({ url: `/api/analysis/report/${documentId}` })
+}
 
 /** 风险等级：分析完成后由后端给出，NONE 表示未识别到风险条款 */
 export type DocumentRiskLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE'
@@ -167,6 +210,20 @@ const mockDocumentList: DocumentRecord[] = [
   },
 ]
 
+/** 列表页尚未做翻页，先取首页 */
+const DOCUMENT_LIST_PAGE_SIZE = 20
+
+/** 后端 DocumentListVO → 页面使用的 DocumentRecord（字段名与缺省风险等级不同） */
+function toDocumentRecord(item: DocumentListItem): DocumentRecord {
+  return {
+    id: item.id,
+    fileName: item.fileName,
+    status: item.status,
+    riskLevel: item.riskLevel ?? 'NONE',
+    createdAt: item.createdTime,
+  }
+}
+
 /** 获取当前用户的文件列表（含分析状态与风险等级） */
 export function listDocuments(): Promise<DocumentRecord[]> {
   if (USE_MOCK_DOCUMENT_LIST) {
@@ -174,5 +231,9 @@ export function listDocuments(): Promise<DocumentRecord[]> {
       setTimeout(() => resolve(mockDocumentList.map(record => ({ ...record }))), MOCK_LIST_DELAY_MS)
     })
   }
-  return request<DocumentRecord[]>({ url: '/api/document/list', showError: false })
+  // /api/document/list 返回游标分页包装，必须解包 records，
+  // 否则页面拿到的是 { records, nextCursor, total }，filter 与字段读取都会出错
+  return getDocumentList(DOCUMENT_LIST_PAGE_SIZE, 'ALL').then(page =>
+    page.records.map(toDocumentRecord)
+  )
 }

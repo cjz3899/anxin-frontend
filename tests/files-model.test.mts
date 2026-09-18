@@ -23,6 +23,19 @@ test('标签过滤：排队与正在分析归入「分析中」，失败文件�
   assert.equal(matchesFileTab({ status: 'FAILED' }, 'completed'), false)
 })
 
+test('点击目标：已完成进报告页，分析中进分析页，失败才提示重新上传', async () => {
+  const { getFileOpenTarget } = await loadFilesModel()
+
+  // 两套命名必须落到同一个目标，否则列表按 SUCCESS 归入「已完成」却点不开报告
+  for (const status of ['SUCCESS', 'COMPLETED'] as const) {
+    assert.equal(getFileOpenTarget(status), 'report')
+  }
+  for (const status of ['PENDING', 'PROCESSING', 'ANALYZING'] as const) {
+    assert.equal(getFileOpenTarget(status), 'analysis')
+  }
+  assert.equal(getFileOpenTarget('FAILED'), 'failed')
+})
+
 test('徽标映射：风险等级对应色调，未识别风险展示「已完成」', async () => {
   const { getFileBadge } = await loadFilesModel()
   const completed = (riskLevel: string) =>

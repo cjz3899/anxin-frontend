@@ -12,7 +12,7 @@ import {
   formatDocumentTime,
   getFileBadge,
   getFileKind,
-  isAnalyzingStatus,
+  getFileOpenTarget,
   matchesFileTab,
   type FileKind,
   type FileTabKey,
@@ -67,17 +67,22 @@ export default function FilesPage() {
 
   const openDocument = (record: DocumentRecord) => {
     const fileName = encodeURIComponent(record.fileName)
-    if (record.status === 'COMPLETED') {
-      void Taro.navigateTo({
-        url: `/pages/report/index?documentId=${record.id}&fileName=${fileName}`,
-      })
-      return
+
+    switch (getFileOpenTarget(record.status)) {
+      case 'report':
+        void Taro.navigateTo({
+          url: `/pages/report/index?documentId=${record.id}&fileName=${fileName}`,
+        })
+        return
+      case 'analysis':
+        // 列表项不含 taskId，只带 documentId，由分析页反查该文件最近一次任务
+        void Taro.navigateTo({
+          url: `/pages/analysis/index?documentId=${record.id}&fileName=${fileName}`,
+        })
+        return
+      default:
+        void Taro.showToast({ title: '分析失败，请重新上传文件', icon: 'none' })
     }
-    if (isAnalyzingStatus(record.status)) {
-      void Taro.navigateTo({ url: `/pages/analysis/index?fileName=${fileName}` })
-      return
-    }
-    void Taro.showToast({ title: '分析失败，请重新上传文件', icon: 'none' })
   }
 
   const activeTabConfig = fileTabs.find(tab => tab.key === activeTab) ?? fileTabs[0]

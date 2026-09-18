@@ -1,4 +1,5 @@
 import type { DocumentRecord, DocumentStatus } from '../../services/document'
+import { isAnalyzingStatus, isCompletedStatus } from '../../utils/document-status.ts'
 
 export type FileTabKey = 'all' | 'analyzing' | 'completed'
 
@@ -43,19 +44,14 @@ export type FileKind = 'pdf' | 'word' | 'image' | 'other'
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic']
 
-/** 排队中与正在分析都归入「分析中」标签 */
-export function isAnalyzingStatus(status: DocumentStatus): boolean {
-  return status === 'PENDING' || status === 'ANALYZING'
-}
-
 export function matchesFileTab(record: Pick<DocumentRecord, 'status'>, tab: FileTabKey): boolean {
   if (tab === 'all') return true
   if (tab === 'analyzing') return isAnalyzingStatus(record.status)
-  return record.status === 'COMPLETED'
+  return isCompletedStatus(record.status)
 }
 
 export function getFileBadge(record: Pick<DocumentRecord, 'status' | 'riskLevel'>): FileBadge {
-  if (record.status === 'COMPLETED') {
+  if (isCompletedStatus(record.status)) {
     if (record.riskLevel === 'HIGH') return { tone: 'danger', text: '高风险' }
     if (record.riskLevel === 'MEDIUM') return { tone: 'warning', text: '中风险' }
     if (record.riskLevel === 'LOW') return { tone: 'success', text: '低风险' }
@@ -63,6 +59,15 @@ export function getFileBadge(record: Pick<DocumentRecord, 'status' | 'riskLevel'
   }
   if (record.status === 'FAILED') return { tone: 'danger', text: '分析失败' }
   return { tone: 'info', text: '分析中' }
+}
+
+/** 点击文件卡片的目标：与标签页口径必须一致，否则会出现「列在已完成里却打不开报告」 */
+export type FileOpenTarget = 'report' | 'analysis' | 'failed'
+
+export function getFileOpenTarget(status: DocumentStatus): FileOpenTarget {
+  if (isCompletedStatus(status)) return 'report'
+  if (isAnalyzingStatus(status)) return 'analysis'
+  return 'failed'
 }
 
 export function getFileKind(fileName: string): FileKind {

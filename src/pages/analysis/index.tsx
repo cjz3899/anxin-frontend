@@ -8,63 +8,67 @@ import { Text, View } from '@tarojs/components'
 
 import AppButton from '../../components/app-button'
 import PageShell from '../../components/page-shell'
-import { getAnalysisTask, reanalyzeDocument, type DocumentStatus } from '../../services'
+import {
+  getAnalysisTask,
+  getDocumentDetail,
+  reanalyzeDocument,
+  type DocumentStatus,
+} from '../../services'
+import { isCompletedStatus, isFailedStatus } from '../../utils/document-status'
+import { buildSteps } from './model'
 
 import './index.less'
 
-/** 轮询间隔：后端约定 2s，检测到 SUCCESS/FAILED 后停止 */
+/** 轮询间隔：后端约定 2s，检测到已完成/失败后停止 */
 const POLL_INTERVAL = 2000
-
-const STEP_LABELS = ['文件格式识别', '内容提取（OCR/Tika）', '风险点分析（AI）', '生成风险报告']
-
-interface StepView {
-  label: string
-  description: string
-  status: 'done' | 'active' | 'pending' | 'error'
-}
-
-function buildSteps(status: DocumentStatus, progress: number): StepView[] {
-  if (status === 'PENDING') {
-    return STEP_LABELS.map((label, index) => ({
-      label,
-      description: index === 0 ? '排队中' : '等待中',
-      status: index === 0 ? 'active' : 'pending',
-    }))
-  }
-  if (status === 'PROCESSING') {
-    return STEP_LABELS.map((label, index) => ({
-      label,
-      description: index < 2 ? '完成' : index === 2 ? '进行中' : '等待中',
-      status: index < 2 ? 'done' : index === 2 ? 'active' : 'pending',
-    }))
-  }
-  if (status === 'SUCCESS') {
-    return STEP_LABELS.map(label => ({ label, description: '完成', status: 'done' as const }))
-  }
-  return STEP_LABELS.map((label, index) => ({
-    label,
-    description: progress >= (index + 1) * 25 ? '已中断' : '未开始',
-    status: progress >= (index + 1) * 25 ? 'error' : 'pending',
-  }))
-}
 
 export default function AnalysisPage() {
   const { params } = useRouter()
-  const taskId = params.taskId ?? ''
   const documentId = params.documentId ?? ''
   const fileName = params.fileName ? decodeURIComponent(params.fileName) : '正在分析文件内容'
 
+  // 上传流程直接带 taskId；从文件列表进入时只有 documentId，需要反查最近一次任务
+  const [taskId, setTaskId] = useState(params.taskId ?? '')
   const [status, setStatus] = useState<DocumentStatus>('PENDING')
   const [progress, setProgress] = useState(4)
   const [errorMessage, setErrorMessage] = useState('')
   const [retrying, setRetrying] = useState(false)
   const navigatedRef = useRef(false)
 
+  useEffect(() => {
+    if (taskId || !documentId) return
+
+    let cancelled = false
+    getDocumentDetail(documentId)
+      .then(detail => {
+        if (cancelled) return
+        if (detail.latestTaskId) {
+          setTaskId(detail.latestTaskId)
+          return
+        }
+        setStatus('FAILED')
+        setErrorMessage('该文件还没有分析任务，可重新发起分析')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setStatus('FAILED')
+        setErrorMessage('分析任务加载失败，可重新发起分析')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [taskId, documentId])
+
   // 分析成功后跳转风险报告页（图4）
   useEffect(() => {
-    if (status !== 'SUCCESS' || !documentId || navigatedRef.current) return
+    if (!isCompletedStatus(status) || !documentId || navigatedRef.current) return
     navigatedRef.current = true
-    Taro.redirectTo({ url: `/pages/report/index?documentId=${documentId}` })
+    Taro.redirectTo({ url: `/pages/report/index?documentId=${documentId}` }).catch(() => {
+      // 跳转失败时放开闩锁，避免用户被困在分析页且报告不可达
+      navigatedRef.current = false
+      void Taro.showToast({ title: '报告页打开失败，请稍后重试', icon: 'none' })
+    })
   }, [status, documentId])
 
   // 轮询任务状态；进度在等待期间缓慢逼近 95%，成功后置 100
@@ -79,11 +83,11 @@ export default function AnalysisPage() {
         const task = await getAnalysisTask(taskId)
         if (stopped) return
         setStatus(task.status)
-        if (task.status === 'SUCCESS') {
+        if (isCompletedStatus(task.status)) {
           setProgress(100)
           return
         }
-        if (task.status === 'FAILED') {
+        if (isFailedStatus(task.status)) {
           setErrorMessage(task.errorMessage || '分析失败，请重新尝试')
           return
         }
@@ -107,28 +111,20 @@ export default function AnalysisPage() {
     setRetrying(true)
     try {
       const result = await reanalyzeDocument(documentId)
-      setErrorMessage('')
-      setProgress(4)
       navigatedRef.current = false
-      setStatus(result.status as DocumentStatus)
-      // 重新分析产生新任务，替换当前轮询目标
-      Taro.redirectTo({
+      // 重新分析会创建新任务，跳转到新任务继续轮询
+      await Taro.redirectTo({
         url: `/pages/analysis/index?taskId=${result.taskId}&documentId=${documentId}&fileName=${encodeURIComponent(fileName)}`,
       })
+    } catch {
+      // request() 失败时已提示并 reject，保留当前失败态让用户可以再次重试
     } finally {
       setRetrying(false)
     }
   }
 
-  const stepViews = buildSteps(status, progress)
-  const failed = status === 'FAILED'
-  const activeStep = failed
-    ? Math.min(3, Math.floor(progress / 25))
-    : status === 'PENDING'
-      ? 0
-      : status === 'PROCESSING'
-        ? 2
-        : 4
+  const { steps, activeStep } = buildSteps(status, progress)
+  const failed = isFailedStatus(status)
 
   return (
     <PageShell className="analysis-page">
@@ -148,12 +144,12 @@ export default function AnalysisPage() {
         </CircleProgress>
 
         <Text className="analysis-main__title">
-          {failed ? '分析失败' : status === 'SUCCESS' ? '分析完成' : '正在分析文件内容…'}
+          {failed ? '分析失败' : isCompletedStatus(status) ? '分析完成' : '正在分析文件内容…'}
         </Text>
         <Text className="analysis-main__file">{fileName}</Text>
 
         <Steps className="analysis-steps" direction="vertical" value={activeStep}>
-          {stepViews.map(step => (
+          {steps.map(step => (
             <Step
               description={step.description}
               icon={
