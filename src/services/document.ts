@@ -107,51 +107,72 @@ export function uploadDocument(filePath: string): Promise<DocumentUploadResult> 
   })
 }
 
-/** 查询当前用户的文件和历史分析记录（游标分页） */
-export function getDocumentList(
-  pageSize: number,
-  statusGroup: DocumentStatusGroup = 'ALL',
-  cursor?: string
-): Promise<PageResult<DocumentListItem>> {
-  // cursor 为空时不能下发 undefined：微信端 GET 会序列化成 "undefined"，
-  // 后端游标解析会直接抛参数错误，导致历史记录列表整体查询失败
-  const data: Record<string, unknown> = { pageSize, statusGroup }
-  if (cursor) data.cursor = cursor
-  return request<PageResult<DocumentListItem>>({
-    url: '/api/document/list',
-    data,
-  })
+/** 文件分析状态：PENDING 排队中 / ANALYZING 分析中 / COMPLETED 已完成 / FAILED 分析失败 */
+export type DocumentStatus = 'PENDING' | 'ANALYZING' | 'COMPLETED' | 'FAILED'
+
+/** 风险等级：分析完成后由后端给出，NONE 表示未识别到风险条款 */
+export type DocumentRiskLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE'
+
+/** 「我的文件」列表项 */
+export interface DocumentRecord {
+  id: string
+  fileName: string
+  status: DocumentStatus
+  riskLevel: DocumentRiskLevel
+  /** 上传时间，格式 yyyy-MM-dd HH:mm:ss */
+  createdAt: string
 }
 
-/** 查询单个文件详情 */
-export function getDocumentDetail(documentId: string): Promise<DocumentDetail> {
-  return request<DocumentDetail>({ url: `/api/document/${documentId}` })
-}
+// TODO(backend): 文件列表接口尚未就绪，先用演示数据支撑页面联调；
+// GET /api/document/list 可用后，删除演示数据并将 USE_MOCK_DOCUMENT_LIST 改为 false。
+const USE_MOCK_DOCUMENT_LIST = true
 
-/** 删除文件及其分析记录 */
-export function deleteDocument(documentId: string): Promise<void> {
-  return request<void>({ url: `/api/document/${documentId}`, method: 'DELETE' })
-}
+const MOCK_LIST_DELAY_MS = 300
 
-/** 对已有文件重新发起分析 */
-export function reanalyzeDocument(documentId: string): Promise<DocumentUploadResult> {
-  return request<DocumentUploadResult>({
-    url: `/api/document/${documentId}/reanalyze`,
-    method: 'POST',
-  })
-}
+const mockDocumentList: DocumentRecord[] = [
+  {
+    id: 'doc-1001',
+    fileName: '合同协议.pdf',
+    status: 'COMPLETED',
+    riskLevel: 'HIGH',
+    createdAt: '2026-09-03 14:32:00',
+  },
+  {
+    id: 'doc-1002',
+    fileName: '租赁合同.docx',
+    status: 'COMPLETED',
+    riskLevel: 'MEDIUM',
+    createdAt: '2026-09-02 16:20:00',
+  },
+  {
+    id: 'doc-1003',
+    fileName: '身份证.jpg',
+    status: 'COMPLETED',
+    riskLevel: 'NONE',
+    createdAt: '2026-09-01 11:03:00',
+  },
+  {
+    id: 'doc-1004',
+    fileName: '公司规章制度.pdf',
+    status: 'COMPLETED',
+    riskLevel: 'LOW',
+    createdAt: '2026-08-28 09:47:00',
+  },
+  {
+    id: 'doc-1005',
+    fileName: '合作协议.docx',
+    status: 'COMPLETED',
+    riskLevel: 'NONE',
+    createdAt: '2026-08-25 15:12:00',
+  },
+]
 
-/** 查询单条风险的切分报告详情 */
-export function getRiskDetail(documentId: string, riskId: string): Promise<RiskDetail> {
-  return request<RiskDetail>({ url: `/api/document/${documentId}/risks/${riskId}` })
-}
-
-/** 轮询分析任务状态（间隔 2s，SUCCESS/FAILED 后停止） */
-export function getAnalysisTask(taskId: string): Promise<AnalysisTask> {
-  return request<AnalysisTask>({ url: `/api/analysis/task/${taskId}` })
-}
-
-/** 查询风险报告（分析任务 SUCCESS 后调用） */
-export function getRiskReport(documentId: string): Promise<RiskReport> {
-  return request<RiskReport>({ url: `/api/analysis/report/${documentId}` })
+/** 获取当前用户的文件列表（含分析状态与风险等级） */
+export function listDocuments(): Promise<DocumentRecord[]> {
+  if (USE_MOCK_DOCUMENT_LIST) {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(mockDocumentList.map(record => ({ ...record }))), MOCK_LIST_DELAY_MS)
+    })
+  }
+  return request<DocumentRecord[]>({ url: '/api/document/list', showError: false })
 }
