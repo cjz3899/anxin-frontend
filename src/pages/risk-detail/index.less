@@ -8,23 +8,27 @@
 .risk-detail-heading {
   display: flex;
   padding: var(--ax-space-3) var(--ax-space-1) var(--ax-space-6);
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: center;
 
-  &__eyebrow,
-  &__title {
-    display: block;
+  &__badge {
+    display: flex;
+    width: 48rpx;
+    height: 48rpx;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--ax-space-3);
+    color: var(--ax-color-text-inverse);
+    font-size: var(--ax-font-size-base);
+    font-weight: var(--ax-font-weight-bold);
+    background: var(--ax-color-danger-icon);
+    border-radius: var(--ax-radius-pill);
   }
 
-  &__eyebrow {
-    color: var(--ax-color-danger-text);
-    font-size: var(--ax-font-size-xs);
-    font-weight: var(--ax-font-weight-semibold);
-    letter-spacing: 2rpx;
-  }
-
   &__title {
-    margin-top: var(--ax-space-2);
+    min-width: 0;
+    flex: 1;
+    margin-right: var(--ax-space-3);
     font-size: var(--ax-font-size-xl);
     font-weight: var(--ax-font-weight-bold);
   }
@@ -95,5 +99,40 @@
   &__arrow {
     margin-left: auto;
     color: var(--ax-color-text-secondary);
+  }
+}
+
+.risk-switcher {
+  display: flex;
+  min-height: var(--ax-size-touch);
+  margin-top: var(--ax-space-5);
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ax-color-surface);
+  border: 1rpx solid var(--ax-color-border);
+  border-radius: var(--ax-radius-pill);
+
+  &__button {
+    display: flex;
+    min-height: var(--ax-size-touch);
+    padding: 0 var(--ax-space-5);
+    align-items: center;
+    gap: var(--ax-space-1);
+    color: var(--ax-color-brand);
+    font-size: var(--ax-font-size-base);
+    font-weight: var(--ax-font-weight-medium);
+
+    &--disabled {
+      color: var(--ax-color-text-disabled);
+    }
+
+    &--pressed {
+      opacity: 0.82;
+    }
+  }
+
+  &__indicator {
+    color: var(--ax-color-text-secondary);
+    font-size: var(--ax-font-size-sm);
   }
 }
