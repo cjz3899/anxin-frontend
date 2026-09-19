@@ -10,7 +10,7 @@ import {
   Setting,
   User,
 } from '@nutui/icons-react-taro'
-import { Button, Image, Input, Text, View } from '@tarojs/components'
+import { Button, Image, Text, View } from '@tarojs/components'
 
 import PageShell from '../../components/page-shell'
 import { STORAGE_KEYS } from '../../constants'
@@ -32,9 +32,6 @@ const menuItems = [
 
 export default function MinePage() {
   const [profile, setProfile] = useState<UserProfile>({})
-  const [editingNickname, setEditingNickname] = useState(false)
-  const [nicknameDraft, setNicknameDraft] = useState('')
-  const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const systemInfo = Taro.getSystemInfoSync()
   const menuButton = Taro.getMenuButtonBoundingClientRect()
@@ -80,7 +77,7 @@ export default function MinePage() {
   // 再把返回的 URL 与昵称一起 POST /api/user/profile 持久化
   const handleChooseAvatar = async (event: { detail?: { avatarUrl?: string } }) => {
     const tempPath = event.detail?.avatarUrl
-    if (!tempPath || uploading || saving) return
+    if (!tempPath || uploading) return
     if (!requireLoggedIn()) return
 
     setUploading(true)
@@ -96,40 +93,6 @@ export default function MinePage() {
       Taro.showToast({ title: getErrorMessage(error, '头像更新失败'), icon: 'none' })
     } finally {
       setUploading(false)
-    }
-  }
-
-  const startEditNickname = () => {
-    setNicknameDraft(profile.nickname || '')
-    setEditingNickname(true)
-  }
-
-  const saveNickname = async () => {
-    const nickname = nicknameDraft.trim()
-    if (!nickname) {
-      Taro.showToast({ title: '昵称不能为空', icon: 'none' })
-      return
-    }
-    if (nickname === profile.nickname) {
-      setEditingNickname(false)
-      return
-    }
-    if (saving || uploading) return
-    if (!requireLoggedIn()) return
-
-    setSaving(true)
-    try {
-      const next = await updateProfile({
-        nickname,
-        avatar: profile.avatar,
-      })
-      persistProfile(next)
-      Taro.showToast({ title: '昵称已更新', icon: 'success' })
-    } catch (error) {
-      Taro.showToast({ title: getErrorMessage(error, '昵称更新失败'), icon: 'none' })
-    } finally {
-      setSaving(false)
-      setEditingNickname(false)
     }
   }
 
@@ -179,27 +142,7 @@ export default function MinePage() {
             </Button>
 
             <View className="mine-header__identity">
-              {editingNickname ? (
-                <Input
-                  className="mine-nickname-input"
-                  focus
-                  maxlength={30}
-                  type="nickname"
-                  value={nicknameDraft}
-                  onBlur={saveNickname}
-                  onConfirm={saveNickname}
-                  onInput={event => setNicknameDraft(event.detail.value)}
-                />
-              ) : (
-                <Button
-                  aria-label="修改昵称"
-                  className="mine-header__name"
-                  hoverClass="mine-header__name--pressed"
-                  onClick={startEditNickname}
-                >
-                  <Text>{profile.nickname || DEFAULT_NICKNAME}</Text>
-                </Button>
-              )}
+              <Text className="mine-header__name">{profile.nickname || DEFAULT_NICKNAME}</Text>
               <Text className="mine-header__role">{uploading ? '头像上传中…' : '普通用户'}</Text>
             </View>
           </View>
