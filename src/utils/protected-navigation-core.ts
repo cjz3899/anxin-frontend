@@ -8,6 +8,7 @@ export type ProtectedNavigationMode = 'navigateTo' | 'reLaunch'
 
 interface ProtectedNavigatorDependencies {
   hasAccessToken: () => boolean
+  confirmLogin: () => Promise<boolean>
   login: () => Promise<LoginSession>
   saveSession: (session: LoginSession) => void
   navigate: (url: string, mode: ProtectedNavigationMode) => Promise<unknown>
@@ -17,9 +18,25 @@ interface ProtectedNavigatorDependencies {
 
 export function createProtectedNavigator(dependencies: ProtectedNavigatorDependencies) {
   let pendingLogin: Promise<void> | null = null
+  let pendingConfirm: Promise<boolean> | null = null
 
   const ensureLoggedIn = async () => {
     if (dependencies.hasAccessToken()) return
+
+    if (!pendingConfirm) {
+      pendingConfirm = dependencies.confirmLogin()
+      pendingConfirm.then(
+        () => {
+          pendingConfirm = null
+        },
+        () => {
+          pendingConfirm = null
+        }
+      )
+    }
+
+    const confirmed = await pendingConfirm
+    if (!confirmed) throw new Error('用户取消登录')
 
     if (!pendingLogin) {
       pendingLogin = dependencies
