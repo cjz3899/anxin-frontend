@@ -50,11 +50,15 @@ export function matchesFileTab(record: Pick<DocumentRecord, 'status'>, tab: File
   return isCompletedStatus(record.status)
 }
 
-export function getFileBadge(record: Pick<DocumentRecord, 'status' | 'riskLevel'>): FileBadge {
+export function getFileBadge(
+  record: Pick<DocumentRecord, 'status' | 'riskLevel' | 'riskCount'>
+): FileBadge {
   if (isCompletedStatus(record.status)) {
-    if (record.riskLevel === 'HIGH') return { tone: 'danger', text: '高风险' }
-    if (record.riskLevel === 'MEDIUM') return { tone: 'warning', text: '中风险' }
-    if (record.riskLevel === 'LOW') return { tone: 'success', text: '低风险' }
+    if (record.riskLevel === 'HIGH') return { tone: 'danger', text: `高风险 ${record.riskCount}` }
+    if (record.riskLevel === 'MEDIUM') {
+      return { tone: 'warning', text: `中风险 ${record.riskCount}` }
+    }
+    if (record.riskLevel === 'LOW') return { tone: 'success', text: `低风险 ${record.riskCount}` }
     return { tone: 'success', text: '已完成' }
   }
   if (record.status === 'FAILED') return { tone: 'danger', text: '分析失败' }

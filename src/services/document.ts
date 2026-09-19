@@ -162,6 +162,7 @@ export interface DocumentRecord {
   fileName: string
   status: DocumentStatus
   riskLevel: DocumentRiskLevel
+  riskCount: number
   /** 上传时间，格式 yyyy-MM-dd HH:mm:ss */
   createdAt: string
 }
@@ -178,6 +179,7 @@ const mockDocumentList: DocumentRecord[] = [
     fileName: '合同协议.pdf',
     status: 'COMPLETED',
     riskLevel: 'HIGH',
+    riskCount: 3,
     createdAt: '2026-09-03 14:32:00',
   },
   {
@@ -185,6 +187,7 @@ const mockDocumentList: DocumentRecord[] = [
     fileName: '租赁合同.docx',
     status: 'COMPLETED',
     riskLevel: 'MEDIUM',
+    riskCount: 2,
     createdAt: '2026-09-02 16:20:00',
   },
   {
@@ -192,6 +195,7 @@ const mockDocumentList: DocumentRecord[] = [
     fileName: '身份证.jpg',
     status: 'COMPLETED',
     riskLevel: 'NONE',
+    riskCount: 0,
     createdAt: '2026-09-01 11:03:00',
   },
   {
@@ -199,6 +203,7 @@ const mockDocumentList: DocumentRecord[] = [
     fileName: '公司规章制度.pdf',
     status: 'COMPLETED',
     riskLevel: 'LOW',
+    riskCount: 1,
     createdAt: '2026-08-28 09:47:00',
   },
   {
@@ -206,6 +211,7 @@ const mockDocumentList: DocumentRecord[] = [
     fileName: '合作协议.docx',
     status: 'COMPLETED',
     riskLevel: 'NONE',
+    riskCount: 0,
     createdAt: '2026-08-25 15:12:00',
   },
 ]
@@ -220,6 +226,7 @@ function toDocumentRecord(item: DocumentListItem): DocumentRecord {
     fileName: item.fileName,
     status: item.status,
     riskLevel: item.riskLevel ?? 'NONE',
+    riskCount: 0,
     createdAt: item.createdTime,
   }
 }
