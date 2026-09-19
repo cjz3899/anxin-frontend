@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Taro, { usePullDownRefresh, useReachBottom } from '@tarojs/taro'
+import Taro, { usePullDownRefresh } from '@tarojs/taro'
 import { ArrowRight, Edit, Failure, Order, Photograph } from '@nutui/icons-react-taro'
 import { Text, View } from '@tarojs/components'
 
@@ -106,10 +106,6 @@ export default function FilesPage() {
 
   usePullDownRefresh(() => {
     void loadDocuments('replace', activeTab, true).finally(() => void Taro.stopPullDownRefresh())
-  })
-
-  useReachBottom(() => {
-    void loadDocuments('append', activeTab)
   })
 
   const openDocument = (record: DocumentRecord) => {
@@ -220,10 +216,19 @@ export default function FilesPage() {
                 </View>
               )
             })}
-            {(loadingMore || nextCursor === null) && (
+            {nextCursor === null ? (
               <Text className="files-list__footer" aria-live="polite">
-                {loadingMore ? '正在加载更多…' : '没有更多文件'}
+                没有更多文件
               </Text>
+            ) : (
+              <AppButton
+                className="files-list__load-more"
+                variant="ghost"
+                disabled={loadingMore}
+                onClick={() => void loadDocuments('append', activeTab)}
+              >
+                {loadingMore ? '正在加载更多…' : '加载更多'}
+              </AppButton>
             )}
           </View>
         ))}
