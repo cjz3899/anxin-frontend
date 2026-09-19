@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import Taro, { useRouter } from '@tarojs/taro'
 import { Clock, Success, Tips } from '@nutui/icons-react-taro'
 import CircleProgress from '@nutui/nutui-react-taro/dist/es/packages/circleprogress'
-import Step from '@nutui/nutui-react-taro/dist/es/packages/step'
-import Steps from '@nutui/nutui-react-taro/dist/es/packages/steps'
 import { Text, View } from '@tarojs/components'
 
 import AppButton from '../../components/app-button'
@@ -123,47 +121,42 @@ export default function AnalysisPage() {
     }
   }
 
-  const { steps, activeStep } = buildSteps(status, progress)
+  const { steps } = buildSteps(status, progress)
   const failed = isFailedStatus(status)
 
   return (
     <PageShell className="analysis-page">
       <View className="analysis-main">
         <CircleProgress
-          background="var(--ax-color-brand-subtle)"
+          background="#dcebff"
           className="progress-ring"
-          color={failed ? 'var(--ax-color-danger-icon)' : 'var(--ax-color-brand)'}
+          color={failed ? '#f94348' : '#1d76f6'}
           percent={progress}
-          radius={78}
+          radius={84}
           strokeWidth={8}
         >
           <View className="progress-ring__content">
             <Text className="progress-ring__value">{progress}%</Text>
-            <Text className="progress-ring__label">分析进度</Text>
           </View>
         </CircleProgress>
 
         <Text className="analysis-main__title">
           {failed ? '分析失败' : isCompletedStatus(status) ? '分析完成' : '正在分析文件内容…'}
         </Text>
-        <Text className="analysis-main__file">{fileName}</Text>
 
-        <Steps className="analysis-steps" direction="vertical" value={activeStep}>
+        <View className="analysis-steps">
           {steps.map(step => (
-            <Step
-              description={step.description}
-              icon={
-                step.status === 'done' ? (
-                  <Success size="16" />
-                ) : step.status === 'error' ? (
-                  <Tips size="16" />
-                ) : undefined
-              }
-              key={step.label}
-              title={step.label}
-            />
+            <View className={`analysis-step analysis-step--${step.status}`} key={step.label}>
+              <View className="analysis-step__marker">
+                {step.status === 'done' && <Success size="13" />}
+                {step.status === 'error' && <Tips size="13" />}
+              </View>
+              <Text className="analysis-step__label">{step.label}</Text>
+              <View className="analysis-step__trailing" />
+              <Text className="analysis-step__status">{step.description}</Text>
+            </View>
           ))}
-        </Steps>
+        </View>
       </View>
 
       {failed ? (
@@ -181,22 +174,23 @@ export default function AnalysisPage() {
           <View className="analysis-note__icon">
             <Clock size="22" />
           </View>
-          <View>
-            <Text className="analysis-note__title">分析任务已在后台创建</Text>
-            <Text className="analysis-note__description">
-              通常需要 1–3 分钟，可先返回稍后查看。
-            </Text>
-          </View>
+          <Text className="analysis-note__description analysis-note__description--plain">
+            分析过程可能需要 1–3 分钟，请耐心等待。
+          </Text>
         </View>
       )}
 
       {failed ? (
-        <AppButton className="analysis-back" loading={retrying} onClick={() => void handleRetry()}>
+        <AppButton
+          className="analysis-back analysis-back--retry"
+          loading={retrying}
+          onClick={() => void handleRetry()}
+        >
           重新分析
         </AppButton>
       ) : (
         <AppButton
-          className="analysis-back"
+          className="analysis-back analysis-back--home"
           variant="ghost"
           onClick={() => Taro.reLaunch({ url: '/pages/index/index' })}
         >
