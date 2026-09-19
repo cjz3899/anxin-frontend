@@ -3,6 +3,7 @@ import Taro, { useDidShow } from '@tarojs/taro'
 import {
   ArrowRight,
   Category,
+  Gift,
   Message,
   Notice,
   Order,
@@ -14,6 +15,7 @@ import { Button, Image, Input, Text, View } from '@tarojs/components'
 import PageShell from '../../components/page-shell'
 import { STORAGE_KEYS } from '../../constants'
 import { getCurrentUser, updateProfile, uploadAvatar, type UserProfile } from '../../services'
+import { getCustomNavigationTopPadding } from '../../utils/custom-navigation'
 import { getErrorMessage } from '../../utils/request-core'
 
 import './index.less'
@@ -34,6 +36,13 @@ export default function MinePage() {
   const [nicknameDraft, setNicknameDraft] = useState('')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const systemInfo = Taro.getSystemInfoSync()
+  const menuButton = Taro.getMenuButtonBoundingClientRect()
+  const customNavigationTopPadding = getCustomNavigationTopPadding({
+    menuBottom: menuButton?.bottom,
+    statusBarHeight: systemInfo.statusBarHeight ?? 0,
+    windowWidth: systemInfo.windowWidth,
+  })
 
   useDidShow(() => {
     const cached = Taro.getStorageSync(STORAGE_KEYS.PROFILE) || {}
@@ -136,70 +145,98 @@ export default function MinePage() {
     }
   }
 
+  const handleMembershipClick = () => {
+    Taro.showToast({ title: '会员功能建设中', icon: 'none' })
+  }
+
   return (
     <PageShell bottomNav="mine" className="mine-page">
-      <View className="mine-header">
-        <View className="mine-header__gear">
-          <Setting size="22" />
+      <View className="mine-page__content" style={{ paddingTop: customNavigationTopPadding }}>
+        <View className="mine-header">
+          <View aria-hidden className="mine-header__gear">
+            <Setting size="22" />
+          </View>
+
+          <View className="mine-header__profile">
+            <Button
+              aria-label="更换头像"
+              className="mine-avatar-button"
+              disabled={uploading}
+              openType="chooseAvatar"
+              onChooseAvatar={handleChooseAvatar}
+            >
+              {profile.avatar ? (
+                <Image
+                  className="mine-avatar-button__image"
+                  mode="aspectFill"
+                  src={profile.avatar}
+                />
+              ) : (
+                <View className="mine-avatar-button__fallback">
+                  <User size="44" />
+                </View>
+              )}
+            </Button>
+
+            <View className="mine-header__identity">
+              {editingNickname ? (
+                <Input
+                  className="mine-nickname-input"
+                  focus
+                  maxlength={30}
+                  type="nickname"
+                  value={nicknameDraft}
+                  onBlur={saveNickname}
+                  onConfirm={saveNickname}
+                  onInput={event => setNicknameDraft(event.detail.value)}
+                />
+              ) : (
+                <Button
+                  aria-label="修改昵称"
+                  className="mine-header__name"
+                  hoverClass="mine-header__name--pressed"
+                  onClick={startEditNickname}
+                >
+                  <Text>{profile.nickname || DEFAULT_NICKNAME}</Text>
+                </Button>
+              )}
+              <Text className="mine-header__role">{uploading ? '头像上传中…' : '普通用户'}</Text>
+            </View>
+          </View>
         </View>
 
-        <Button
-          className="mine-avatar-button"
-          disabled={uploading}
-          openType="chooseAvatar"
-          onChooseAvatar={handleChooseAvatar}
-        >
-          {profile.avatar ? (
-            <Image className="mine-avatar-button__image" mode="aspectFill" src={profile.avatar} />
-          ) : (
-            <View className="mine-avatar-button__fallback">
-              <User size="44" />
-            </View>
-          )}
-        </Button>
-
-        {editingNickname ? (
-          <Input
-            className="mine-nickname-input"
-            focus
-            maxlength={30}
-            type="nickname"
-            value={nicknameDraft}
-            onBlur={saveNickname}
-            onConfirm={saveNickname}
-            onInput={event => setNicknameDraft(event.detail.value)}
-          />
-        ) : (
-          <View
-            className="mine-header__name"
-            hoverClass="mine-header__name--pressed"
-            onClick={startEditNickname}
-          >
-            <Text>{profile.nickname || DEFAULT_NICKNAME}</Text>
-            <Text className="mine-header__name-hint">点击修改昵称</Text>
+        <View className="mine-membership">
+          <View className="mine-membership__icon" aria-hidden>
+            <Gift size="34" />
           </View>
-        )}
-        <Text className="mine-header__role">{uploading ? '头像上传中…' : '普通用户'}</Text>
-      </View>
+          <View className="mine-membership__content">
+            <Text className="mine-membership__title">开通会员</Text>
+            <Text className="mine-membership__description">解锁更多高级功能</Text>
+          </View>
+          <Button className="mine-membership__button" onClick={handleMembershipClick}>
+            立即开通
+          </Button>
+        </View>
 
-      <View className="mine-menu">
-        {menuItems.map(item => {
-          const Icon = item.icon
-          return (
-            <View
-              className="mine-menu__item"
-              hoverClass="mine-menu__item--pressed"
-              key={item.key}
-              onClick={() => handleMenuClick(item)}
-            >
-              <View className="mine-menu__icon">
-                <Icon size="22" />
-              </View>
-              <Text className="mine-menu__title">{item.title}</Text>
-              <ArrowRight className="mine-menu__arrow" size="16" />
-            </View>
-          )
-        })}
+        <View className="mine-menu">
+          {menuItems.map(item => {
+            const Icon = item.icon
+            return (
+              <Button
+                className="mine-menu__item"
+                hoverClass="mine-menu__item--pressed"
+                key={item.key}
+                onClick={() => handleMenuClick(item)}
+              >
+                <View className="mine-menu__icon" aria-hidden>
+                  <Icon size="22" />
+                </View>
+                <Text className="mine-menu__title">{item.title}</Text>
+                <ArrowRight aria-hidden className="mine-menu__arrow" size="16" />
+              </Button>
+            )
+          })}
+        </View>
       </View>
     </PageShell>
   )
