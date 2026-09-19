@@ -116,7 +116,7 @@ export function getDocumentList(
 ): Promise<PageResult<DocumentListItem>> {
   return request<PageResult<DocumentListItem>>({
     url: '/api/document/list',
-    data: { pageSize, statusGroup, cursor },
+    data: { pageSize, statusGroup, ...(cursor ? { cursor } : {}) },
   })
 }
 
