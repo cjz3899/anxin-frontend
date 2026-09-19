@@ -5,22 +5,17 @@ async function loadFilesModel() {
   return import('../src/pages/files/model.ts')
 }
 
-test('标签过滤：排队与正在分析归入「分析中」，失败文件只出现在「全部」', async () => {
-  const { matchesFileTab } = await loadFilesModel()
+test('标签映射：文件页 Tab 使用后端状态分组', async () => {
+  const { fileTabs } = await loadFilesModel()
 
-  for (const status of ['PENDING', 'ANALYZING'] as const) {
-    assert.equal(matchesFileTab({ status }, 'all'), true)
-    assert.equal(matchesFileTab({ status }, 'analyzing'), true)
-    assert.equal(matchesFileTab({ status }, 'completed'), false)
-  }
-
-  assert.equal(matchesFileTab({ status: 'COMPLETED' }, 'all'), true)
-  assert.equal(matchesFileTab({ status: 'COMPLETED' }, 'analyzing'), false)
-  assert.equal(matchesFileTab({ status: 'COMPLETED' }, 'completed'), true)
-
-  assert.equal(matchesFileTab({ status: 'FAILED' }, 'all'), true)
-  assert.equal(matchesFileTab({ status: 'FAILED' }, 'analyzing'), false)
-  assert.equal(matchesFileTab({ status: 'FAILED' }, 'completed'), false)
+  assert.deepEqual(
+    fileTabs.map(tab => [tab.key, tab.statusGroup]),
+    [
+      ['all', 'ALL'],
+      ['analyzing', 'PROCESSING'],
+      ['completed', 'SUCCESS'],
+    ]
+  )
 })
 
 test('点击目标：已完成进报告页，分析中进分析页，失败才提示重新上传', async () => {
@@ -39,11 +34,11 @@ test('点击目标：已完成进报告页，分析中进分析页，失败才�
 test('徽标映射：风险等级对应色调，未识别风险展示「已完成」', async () => {
   const { getFileBadge } = await loadFilesModel()
   const completed = (riskLevel: string) =>
-    getFileBadge({ status: 'COMPLETED', riskLevel, riskCount: 0 } as Parameters<typeof getFileBadge>[0])
+    getFileBadge({ status: 'COMPLETED', riskLevel } as Parameters<typeof getFileBadge>[0])
 
-  assert.deepEqual(completed('HIGH'), { tone: 'danger', text: '高风险 0' })
-  assert.deepEqual(completed('MEDIUM'), { tone: 'warning', text: '中风险 0' })
-  assert.deepEqual(completed('LOW'), { tone: 'success', text: '低风险 0' })
+  assert.deepEqual(completed('HIGH'), { tone: 'danger', text: '高风险' })
+  assert.deepEqual(completed('MEDIUM'), { tone: 'warning', text: '中风险' })
+  assert.deepEqual(completed('LOW'), { tone: 'success', text: '低风险' })
   assert.deepEqual(completed('NONE'), { tone: 'success', text: '已完成' })
 
   assert.deepEqual(getFileBadge({ status: 'ANALYZING', riskLevel: 'NONE' }), {
@@ -57,23 +52,6 @@ test('徽标映射：风险等级对应色调，未识别风险展示「已完�
   assert.deepEqual(getFileBadge({ status: 'FAILED', riskLevel: 'NONE' }), {
     tone: 'danger',
     text: '分析失败',
-  })
-})
-
-test('风险徽标：风险类别后显示风险数量，数量为 0 也保留', async () => {
-  const { getFileBadge } = await loadFilesModel()
-
-  assert.deepEqual(getFileBadge({ status: 'COMPLETED', riskLevel: 'HIGH', riskCount: 3 }), {
-    tone: 'danger',
-    text: '高风险 3',
-  })
-  assert.deepEqual(getFileBadge({ status: 'COMPLETED', riskLevel: 'MEDIUM', riskCount: 2 }), {
-    tone: 'warning',
-    text: '中风险 2',
-  })
-  assert.deepEqual(getFileBadge({ status: 'COMPLETED', riskLevel: 'LOW', riskCount: 0 }), {
-    tone: 'success',
-    text: '低风险 0',
   })
 })
 
