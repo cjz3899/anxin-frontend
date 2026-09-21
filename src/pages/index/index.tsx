@@ -1,11 +1,18 @@
+import { useLayoutEffect, useState } from 'react'
 import { Category, Message, Order, ShieldCheck } from '@nutui/icons-react-taro'
+import '@nutui/nutui-react-taro/dist/es/packages/popup/style/css'
 import { Image, Text, View } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 
 import AppButton from '../../components/app-button'
+import LoginModal from '../../components/login-modal'
 import PageShell from '../../components/page-shell'
 import { getCustomNavigationTopPadding } from '../../utils/custom-navigation'
-import { openProtectedPage } from '../../utils/protected-navigation'
+import {
+  confirmLoginResult,
+  openProtectedPage,
+  registerLoginModal,
+} from '../../utils/protected-navigation'
 import homeHeroImage from '../../assets/document-risk-assistant-icon.svg'
 
 import { homeFeatures } from './home-features'
@@ -19,6 +26,7 @@ const featureIcons = {
 }
 
 export default function Home() {
+  const [loginModalVisible, setLoginModalVisible] = useState(false)
   const systemInfo = Taro.getSystemInfoSync()
   const menuButton = Taro.getMenuButtonBoundingClientRect()
   const immersiveHeaderPadding = getCustomNavigationTopPadding({
@@ -26,6 +34,20 @@ export default function Home() {
     statusBarHeight: systemInfo.statusBarHeight ?? 0,
     windowWidth: systemInfo.windowWidth,
   })
+
+  useLayoutEffect(() => {
+    return registerLoginModal(() => setLoginModalVisible(true))
+  }, [])
+
+  const handleLoginConfirm = () => {
+    setLoginModalVisible(false)
+    confirmLoginResult(true)
+  }
+
+  const handleLoginCancel = () => {
+    setLoginModalVisible(false)
+    confirmLoginResult(false)
+  }
 
   return (
     <PageShell bottomNav="home" className="home-page">
@@ -82,6 +104,12 @@ export default function Home() {
           })}
         </View>
       </View>
+
+      <LoginModal
+        visible={loginModalVisible}
+        onConfirm={handleLoginConfirm}
+        onCancel={handleLoginCancel}
+      />
     </PageShell>
   )
 }

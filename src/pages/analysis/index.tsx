@@ -2,69 +2,71 @@ import { useEffect, useRef, useState } from 'react'
 import Taro, { useRouter } from '@tarojs/taro'
 import { Clock, Success, Tips } from '@nutui/icons-react-taro'
 import CircleProgress from '@nutui/nutui-react-taro/dist/es/packages/circleprogress'
-import Step from '@nutui/nutui-react-taro/dist/es/packages/step'
-import Steps from '@nutui/nutui-react-taro/dist/es/packages/steps'
 import { Text, View } from '@tarojs/components'
 
 import AppButton from '../../components/app-button'
 import PageShell from '../../components/page-shell'
-import { getAnalysisTask, reanalyzeDocument, type DocumentStatus } from '../../services'
+import {
+  getAnalysisTask,
+  getDocumentDetail,
+  reanalyzeDocument,
+  type DocumentStatus,
+} from '../../services'
+import { isCompletedStatus, isFailedStatus } from '../../utils/document-status'
+import { buildSteps } from './model'
 
 import './index.less'
 
-/** 轮询间隔：后端约定 2s，检测到 SUCCESS/FAILED 后停止 */
+/** 轮询间隔：后端约定 2s，检测到已完成/失败后停止 */
 const POLL_INTERVAL = 2000
-
-const STEP_LABELS = ['文件格式识别', '内容提取（OCR/Tika）', '风险点分析（AI）', '生成风险报告']
-
-interface StepView {
-  label: string
-  description: string
-  status: 'done' | 'active' | 'pending' | 'error'
-}
-
-function buildSteps(status: DocumentStatus, progress: number): StepView[] {
-  if (status === 'PENDING') {
-    return STEP_LABELS.map((label, index) => ({
-      label,
-      description: index === 0 ? '排队中' : '等待中',
-      status: index === 0 ? 'active' : 'pending',
-    }))
-  }
-  if (status === 'PROCESSING') {
-    return STEP_LABELS.map((label, index) => ({
-      label,
-      description: index < 2 ? '完成' : index === 2 ? '进行中' : '等待中',
-      status: index < 2 ? 'done' : index === 2 ? 'active' : 'pending',
-    }))
-  }
-  if (status === 'SUCCESS') {
-    return STEP_LABELS.map(label => ({ label, description: '完成', status: 'done' as const }))
-  }
-  return STEP_LABELS.map((label, index) => ({
-    label,
-    description: progress >= (index + 1) * 25 ? '已中断' : '未开始',
-    status: progress >= (index + 1) * 25 ? 'error' : 'pending',
-  }))
-}
 
 export default function AnalysisPage() {
   const { params } = useRouter()
-  const taskId = params.taskId ?? ''
   const documentId = params.documentId ?? ''
   const fileName = params.fileName ? decodeURIComponent(params.fileName) : '正在分析文件内容'
 
+  // 上传流程直接带 taskId；从文件列表进入时只有 documentId，需要反查最近一次任务
+  const [taskId, setTaskId] = useState(params.taskId ?? '')
   const [status, setStatus] = useState<DocumentStatus>('PENDING')
   const [progress, setProgress] = useState(4)
   const [errorMessage, setErrorMessage] = useState('')
   const [retrying, setRetrying] = useState(false)
   const navigatedRef = useRef(false)
 
+  useEffect(() => {
+    if (taskId || !documentId) return
+
+    let cancelled = false
+    getDocumentDetail(documentId)
+      .then(detail => {
+        if (cancelled) return
+        if (detail.latestTaskId) {
+          setTaskId(detail.latestTaskId)
+          return
+        }
+        setStatus('FAILED')
+        setErrorMessage('该文件还没有分析任务，可重新发起分析')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setStatus('FAILED')
+        setErrorMessage('分析任务加载失败，可重新发起分析')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [taskId, documentId])
+
   // 分析成功后跳转风险报告页（图4）
   useEffect(() => {
-    if (status !== 'SUCCESS' || !documentId || navigatedRef.current) return
+    if (!isCompletedStatus(status) || !documentId || navigatedRef.current) return
     navigatedRef.current = true
-    Taro.redirectTo({ url: `/pages/report/index?documentId=${documentId}` })
+    Taro.redirectTo({ url: `/pages/report/index?documentId=${documentId}` }).catch(() => {
+      // 跳转失败时放开闩锁，避免用户被困在分析页且报告不可达
+      navigatedRef.current = false
+      void Taro.showToast({ title: '报告页打开失败，请稍后重试', icon: 'none' })
+    })
   }, [status, documentId])
 
   // 轮询任务状态；进度在等待期间缓慢逼近 95%，成功后置 100
@@ -79,11 +81,11 @@ export default function AnalysisPage() {
         const task = await getAnalysisTask(taskId)
         if (stopped) return
         setStatus(task.status)
-        if (task.status === 'SUCCESS') {
+        if (isCompletedStatus(task.status)) {
           setProgress(100)
           return
         }
-        if (task.status === 'FAILED') {
+        if (isFailedStatus(task.status)) {
           setErrorMessage(task.errorMessage || '分析失败，请重新尝试')
           return
         }
@@ -107,67 +109,54 @@ export default function AnalysisPage() {
     setRetrying(true)
     try {
       const result = await reanalyzeDocument(documentId)
-      setErrorMessage('')
-      setProgress(4)
       navigatedRef.current = false
-      setStatus(result.status as DocumentStatus)
-      // 重新分析产生新任务，替换当前轮询目标
-      Taro.redirectTo({
+      // 重新分析会创建新任务，跳转到新任务继续轮询
+      await Taro.redirectTo({
         url: `/pages/analysis/index?taskId=${result.taskId}&documentId=${documentId}&fileName=${encodeURIComponent(fileName)}`,
       })
+    } catch {
+      // request() 失败时已提示并 reject，保留当前失败态让用户可以再次重试
     } finally {
       setRetrying(false)
     }
   }
 
-  const stepViews = buildSteps(status, progress)
-  const failed = status === 'FAILED'
-  const activeStep = failed
-    ? Math.min(3, Math.floor(progress / 25))
-    : status === 'PENDING'
-      ? 0
-      : status === 'PROCESSING'
-        ? 2
-        : 4
+  const { steps } = buildSteps(status, progress)
+  const failed = isFailedStatus(status)
 
   return (
     <PageShell className="analysis-page">
       <View className="analysis-main">
         <CircleProgress
-          background="var(--ax-color-brand-subtle)"
+          background="#dcebff"
           className="progress-ring"
-          color={failed ? 'var(--ax-color-danger-icon)' : 'var(--ax-color-brand)'}
+          color={failed ? '#f94348' : '#1d76f6'}
           percent={progress}
-          radius={78}
+          radius={84}
           strokeWidth={8}
         >
           <View className="progress-ring__content">
             <Text className="progress-ring__value">{progress}%</Text>
-            <Text className="progress-ring__label">分析进度</Text>
           </View>
         </CircleProgress>
 
         <Text className="analysis-main__title">
-          {failed ? '分析失败' : status === 'SUCCESS' ? '分析完成' : '正在分析文件内容…'}
+          {failed ? '分析失败' : isCompletedStatus(status) ? '分析完成' : '正在分析文件内容…'}
         </Text>
-        <Text className="analysis-main__file">{fileName}</Text>
 
-        <Steps className="analysis-steps" direction="vertical" value={activeStep}>
-          {stepViews.map(step => (
-            <Step
-              description={step.description}
-              icon={
-                step.status === 'done' ? (
-                  <Success size="16" />
-                ) : step.status === 'error' ? (
-                  <Tips size="16" />
-                ) : undefined
-              }
-              key={step.label}
-              title={step.label}
-            />
+        <View className="analysis-steps">
+          {steps.map(step => (
+            <View className={`analysis-step analysis-step--${step.status}`} key={step.label}>
+              <View className="analysis-step__marker">
+                {step.status === 'done' && <Success size="13" />}
+                {step.status === 'error' && <Tips size="13" />}
+              </View>
+              <Text className="analysis-step__label">{step.label}</Text>
+              <View className="analysis-step__trailing" />
+              <Text className="analysis-step__status">{step.description}</Text>
+            </View>
           ))}
-        </Steps>
+        </View>
       </View>
 
       {failed ? (
@@ -185,22 +174,23 @@ export default function AnalysisPage() {
           <View className="analysis-note__icon">
             <Clock size="22" />
           </View>
-          <View>
-            <Text className="analysis-note__title">分析任务已在后台创建</Text>
-            <Text className="analysis-note__description">
-              通常需要 1–3 分钟，可先返回稍后查看。
-            </Text>
-          </View>
+          <Text className="analysis-note__description analysis-note__description--plain">
+            分析过程可能需要 1–3 分钟，请耐心等待。
+          </Text>
         </View>
       )}
 
       {failed ? (
-        <AppButton className="analysis-back" loading={retrying} onClick={() => void handleRetry()}>
+        <AppButton
+          className="analysis-back analysis-back--retry"
+          loading={retrying}
+          onClick={() => void handleRetry()}
+        >
           重新分析
         </AppButton>
       ) : (
         <AppButton
-          className="analysis-back"
+          className="analysis-back analysis-back--home"
           variant="ghost"
           onClick={() => Taro.reLaunch({ url: '/pages/index/index' })}
         >

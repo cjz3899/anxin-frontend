@@ -1,47 +1,47 @@
 @import '../../styles/mixins.less';
 
 .mine-page {
-  padding: var(--ax-space-5) 30rpx calc(var(--ax-space-8) + env(safe-area-inset-bottom));
+  padding: 0 30rpx calc(var(--ax-space-8) + env(safe-area-inset-bottom));
   background: var(--ax-gradient-hero), var(--ax-color-page);
+}
+
+.mine-page__content {
+  min-height: 100%;
 }
 
 .mine-header {
   position: relative;
   display: flex;
-  padding: var(--ax-space-7) var(--ax-space-5) var(--ax-space-6);
-  align-items: center;
-  flex-direction: column;
-  background: var(--ax-color-surface);
-  border-radius: var(--ax-radius-xl);
-  box-shadow: var(--ax-shadow-light);
+  padding: var(--ax-space-5) 0 var(--ax-space-4);
+  align-items: flex-start;
 
   &__gear {
     position: absolute;
-    top: var(--ax-space-4);
-    right: var(--ax-space-4);
+    top: var(--ax-space-1);
+    right: var(--ax-space-1);
     display: flex;
     color: var(--ax-color-text-secondary);
+  }
+
+  &__profile {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+  }
+
+  &__identity {
+    display: flex;
+    min-width: 0;
+    margin-left: var(--ax-space-4);
+    flex-direction: column;
   }
 
   &__name {
-    display: flex;
-    min-height: var(--ax-size-touch);
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
+    display: block;
+    color: var(--ax-color-text-primary);
     font-size: var(--ax-font-size-xl);
     font-weight: var(--ax-font-weight-bold);
-
-    &--pressed {
-      opacity: 0.82;
-    }
-  }
-
-  &__name-hint {
-    margin-top: var(--ax-space-1);
-    color: var(--ax-color-text-secondary);
-    font-size: var(--ax-font-size-xs);
-    font-weight: var(--ax-font-weight-regular);
+    line-height: 1.3;
   }
 
   &__role {
@@ -54,10 +54,10 @@
 // 复用微信 openType=chooseAvatar 能力，重置原生按钮默认样式承载头像
 .mine-avatar-button {
   display: flex;
-  width: 144rpx;
-  height: 144rpx;
+  width: 136rpx;
+  height: 136rpx;
   padding: 0;
-  margin: 0 0 var(--ax-space-3);
+  margin: 0;
   overflow: hidden;
   align-items: center;
   justify-content: center;
@@ -82,19 +82,67 @@
   }
 }
 
-.mine-nickname-input {
-  width: 320rpx;
-  height: var(--ax-size-touch);
-  padding: 0 var(--ax-space-4);
-  margin-bottom: var(--ax-space-2);
-  font-size: var(--ax-font-size-lg);
-  text-align: center;
-  background: var(--ax-color-surface-subtle);
-  border-radius: var(--ax-radius-pill);
+.mine-membership {
+  display: flex;
+  min-height: 176rpx;
+  padding: var(--ax-space-4) var(--ax-space-5);
+  align-items: center;
+  color: var(--ax-color-text-inverse);
+  background: var(--ax-color-navy);
+  border-radius: var(--ax-radius-lg);
+  box-shadow: var(--ax-shadow-light);
+
+  &__icon {
+    display: flex;
+    flex: 0 0 auto;
+    color: var(--ax-color-gold);
+  }
+
+  &__content {
+    display: flex;
+    min-width: 0;
+    margin-left: var(--ax-space-3);
+    flex: 1;
+    flex-direction: column;
+  }
+
+  &__title,
+  &__description {
+    display: block;
+  }
+
+  &__title {
+    font-size: var(--ax-font-size-lg);
+    font-weight: var(--ax-font-weight-bold);
+  }
+
+  &__description {
+    margin-top: var(--ax-space-2);
+    color: var(--ax-color-overlay-medium);
+    font-size: var(--ax-font-size-sm);
+  }
+
+  &__button {
+    width: 168rpx;
+    min-height: var(--ax-size-touch);
+    padding: 0 var(--ax-space-3);
+    flex: 0 0 auto;
+    color: var(--ax-color-navy);
+    font-size: var(--ax-font-size-sm);
+    font-weight: var(--ax-font-weight-bold);
+    line-height: var(--ax-size-touch);
+    background: var(--ax-color-gold);
+    border: none;
+    border-radius: var(--ax-radius-pill);
+
+    &::after {
+      border: none;
+    }
+  }
 }
 
 .mine-menu {
-  margin-top: var(--ax-space-4);
+  margin-top: var(--ax-space-5);
   overflow: hidden;
   background: var(--ax-color-surface);
   border-radius: var(--ax-radius-xl);
@@ -105,6 +153,15 @@
     min-height: var(--ax-size-touch);
     padding: 0 var(--ax-space-4);
     align-items: center;
+    width: 100%;
+    color: var(--ax-color-text-primary);
+    line-height: normal;
+    text-align: left;
+    background: transparent;
+
+    &::after {
+      border: none;
+    }
 
     &:not(:last-child) {
       border-bottom: 1rpx solid var(--ax-color-border);

@@ -4,7 +4,7 @@
   "description": "安心文档分析 —— 智能合同风险分析助手",
   "appid": "wxfecc26a8ec2ed78e",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "es6": false,
     "enhance": false,
     "compileHotReLoad": false,

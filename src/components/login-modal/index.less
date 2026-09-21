@@ -1,0 +1,35 @@
+.login-modal {
+  padding: var(--ax-space-6) var(--ax-space-5);
+  padding-bottom: calc(var(--ax-space-6) + env(safe-area-inset-bottom));
+
+  &__header {
+    text-align: center;
+    margin-bottom: var(--ax-space-6);
+  }
+
+  &__title {
+    display: block;
+    font-size: var(--ax-font-size-xl);
+    font-weight: var(--ax-font-weight-semibold);
+    color: var(--ax-color-text-primary);
+    margin-bottom: var(--ax-space-3);
+  }
+
+  &__desc {
+    display: block;
+    font-size: var(--ax-font-size-base);
+    color: var(--ax-color-text-secondary);
+    line-height: 1.6;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ax-space-3);
+  }
+
+  &__wechat-icon {
+    margin-right: var(--ax-space-2);
+    font-size: var(--ax-font-size-lg);
+  }
+}

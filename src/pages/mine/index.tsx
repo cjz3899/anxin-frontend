@@ -3,17 +3,19 @@ import Taro, { useDidShow } from '@tarojs/taro'
 import {
   ArrowRight,
   Category,
+  Gift,
   Message,
   Notice,
   Order,
   Setting,
   User,
 } from '@nutui/icons-react-taro'
-import { Button, Image, Input, Text, View } from '@tarojs/components'
+import { Button, Image, Text, View } from '@tarojs/components'
 
 import PageShell from '../../components/page-shell'
 import { STORAGE_KEYS } from '../../constants'
 import { getCurrentUser, updateProfile, uploadAvatar, type UserProfile } from '../../services'
+import { getCustomNavigationTopPadding } from '../../utils/custom-navigation'
 import { getErrorMessage } from '../../utils/request-core'
 
 import './index.less'
@@ -30,10 +32,14 @@ const menuItems = [
 
 export default function MinePage() {
   const [profile, setProfile] = useState<UserProfile>({})
-  const [editingNickname, setEditingNickname] = useState(false)
-  const [nicknameDraft, setNicknameDraft] = useState('')
-  const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const systemInfo = Taro.getSystemInfoSync()
+  const menuButton = Taro.getMenuButtonBoundingClientRect()
+  const customNavigationTopPadding = getCustomNavigationTopPadding({
+    menuBottom: menuButton?.bottom,
+    statusBarHeight: systemInfo.statusBarHeight ?? 0,
+    windowWidth: systemInfo.windowWidth,
+  })
 
   useDidShow(() => {
     const cached = Taro.getStorageSync(STORAGE_KEYS.PROFILE) || {}
@@ -71,7 +77,7 @@ export default function MinePage() {
   // 再把返回的 URL 与昵称一起 POST /api/user/profile 持久化
   const handleChooseAvatar = async (event: { detail?: { avatarUrl?: string } }) => {
     const tempPath = event.detail?.avatarUrl
-    if (!tempPath || uploading || saving) return
+    if (!tempPath || uploading) return
     if (!requireLoggedIn()) return
 
     setUploading(true)
@@ -90,40 +96,6 @@ export default function MinePage() {
     }
   }
 
-  const startEditNickname = () => {
-    setNicknameDraft(profile.nickname || '')
-    setEditingNickname(true)
-  }
-
-  const saveNickname = async () => {
-    const nickname = nicknameDraft.trim()
-    if (!nickname) {
-      Taro.showToast({ title: '昵称不能为空', icon: 'none' })
-      return
-    }
-    if (nickname === profile.nickname) {
-      setEditingNickname(false)
-      return
-    }
-    if (saving || uploading) return
-    if (!requireLoggedIn()) return
-
-    setSaving(true)
-    try {
-      const next = await updateProfile({
-        nickname,
-        avatar: profile.avatar,
-      })
-      persistProfile(next)
-      Taro.showToast({ title: '昵称已更新', icon: 'success' })
-    } catch (error) {
-      Taro.showToast({ title: getErrorMessage(error, '昵称更新失败'), icon: 'none' })
-    } finally {
-      setSaving(false)
-      setEditingNickname(false)
-    }
-  }
-
   const handleMenuClick = (item: (typeof menuItems)[number]) => {
     if (!item.url) {
       Taro.showToast({ title: '功能建设中', icon: 'none' })
@@ -136,70 +108,78 @@ export default function MinePage() {
     }
   }
 
+  const handleMembershipClick = () => {
+    Taro.showToast({ title: '会员功能建设中', icon: 'none' })
+  }
+
   return (
     <PageShell bottomNav="mine" className="mine-page">
-      <View className="mine-header">
-        <View className="mine-header__gear">
-          <Setting size="22" />
+      <View className="mine-page__content" style={{ paddingTop: customNavigationTopPadding }}>
+        <View className="mine-header">
+          <View aria-hidden className="mine-header__gear">
+            <Setting size="22" />
+          </View>
+
+          <View className="mine-header__profile">
+            <Button
+              aria-label="更换头像"
+              className="mine-avatar-button"
+              disabled={uploading}
+              openType="chooseAvatar"
+              onChooseAvatar={handleChooseAvatar}
+            >
+              {profile.avatar ? (
+                <Image
+                  className="mine-avatar-button__image"
+                  mode="aspectFill"
+                  src={profile.avatar}
+                />
+              ) : (
+                <View className="mine-avatar-button__fallback">
+                  <User size="44" />
+                </View>
+              )}
+            </Button>
+
+            <View className="mine-header__identity">
+              <Text className="mine-header__name">{profile.nickname || DEFAULT_NICKNAME}</Text>
+              <Text className="mine-header__role">{uploading ? '头像上传中…' : '普通用户'}</Text>
+            </View>
+          </View>
         </View>
 
-        <Button
-          className="mine-avatar-button"
-          disabled={uploading}
-          openType="chooseAvatar"
-          onChooseAvatar={handleChooseAvatar}
-        >
-          {profile.avatar ? (
-            <Image className="mine-avatar-button__image" mode="aspectFill" src={profile.avatar} />
-          ) : (
-            <View className="mine-avatar-button__fallback">
-              <User size="44" />
-            </View>
-          )}
-        </Button>
-
-        {editingNickname ? (
-          <Input
-            className="mine-nickname-input"
-            focus
-            maxlength={30}
-            type="nickname"
-            value={nicknameDraft}
-            onBlur={saveNickname}
-            onConfirm={saveNickname}
-            onInput={event => setNicknameDraft(event.detail.value)}
-          />
-        ) : (
-          <View
-            className="mine-header__name"
-            hoverClass="mine-header__name--pressed"
-            onClick={startEditNickname}
-          >
-            <Text>{profile.nickname || DEFAULT_NICKNAME}</Text>
-            <Text className="mine-header__name-hint">点击修改昵称</Text>
+        <View className="mine-membership">
+          <View className="mine-membership__icon" aria-hidden>
+            <Gift size="34" />
           </View>
-        )}
-        <Text className="mine-header__role">{uploading ? '头像上传中…' : '普通用户'}</Text>
-      </View>
+          <View className="mine-membership__content">
+            <Text className="mine-membership__title">开通会员</Text>
+            <Text className="mine-membership__description">解锁更多高级功能</Text>
+          </View>
+          <Button className="mine-membership__button" onClick={handleMembershipClick}>
+            立即开通
+          </Button>
+        </View>
 
-      <View className="mine-menu">
-        {menuItems.map(item => {
-          const Icon = item.icon
-          return (
-            <View
-              className="mine-menu__item"
-              hoverClass="mine-menu__item--pressed"
-              key={item.key}
-              onClick={() => handleMenuClick(item)}
-            >
-              <View className="mine-menu__icon">
-                <Icon size="22" />
-              </View>
-              <Text className="mine-menu__title">{item.title}</Text>
-              <ArrowRight className="mine-menu__arrow" size="16" />
-            </View>
-          )
-        })}
+        <View className="mine-menu">
+          {menuItems.map(item => {
+            const Icon = item.icon
+            return (
+              <Button
+                className="mine-menu__item"
+                hoverClass="mine-menu__item--pressed"
+                key={item.key}
+                onClick={() => handleMenuClick(item)}
+              >
+                <View className="mine-menu__icon" aria-hidden>
+                  <Icon size="22" />
+                </View>
+                <Text className="mine-menu__title">{item.title}</Text>
+                <ArrowRight aria-hidden className="mine-menu__arrow" size="16" />
+              </Button>
+            )
+          })}
+        </View>
       </View>
     </PageShell>
   )

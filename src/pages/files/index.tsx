@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Taro, { usePullDownRefresh } from '@tarojs/taro'
 import { ArrowRight, Edit, Failure, Order, Photograph } from '@nutui/icons-react-taro'
 import { Text, View } from '@tarojs/components'
@@ -12,8 +12,7 @@ import {
   formatDocumentTime,
   getFileBadge,
   getFileKind,
-  isAnalyzingStatus,
-  matchesFileTab,
+  getFileOpenTarget,
   type FileKind,
   type FileTabKey,
 } from './model'
@@ -21,6 +20,7 @@ import {
 import './index.less'
 
 type LoadPhase = 'loading' | 'success' | 'error'
+type LoadMode = 'replace' | 'append'
 
 const SKELETON_COUNT = 4
 
@@ -47,41 +47,88 @@ export default function FilesPage() {
   const [documents, setDocuments] = useState<DocumentRecord[]>([])
   const [phase, setPhase] = useState<LoadPhase>('loading')
   const [activeTab, setActiveTab] = useState<FileTabKey>('all')
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const documentsRef = useRef<DocumentRecord[]>([])
+  const nextCursorRef = useRef<string | null>(null)
+  const requestIdRef = useRef(0)
+  const loadingRef = useRef(false)
 
-  const fetchDocuments = async () => {
-    try {
-      setDocuments(await listDocuments())
-      setPhase('success')
-    } catch {
-      setPhase('error')
-    }
-  }
+  const loadDocuments = useCallback(
+    async (mode: LoadMode, tabKey: FileTabKey, preserveOnError = false) => {
+      if (mode === 'append' && (loadingRef.current || !nextCursorRef.current)) return
+
+      const requestId = ++requestIdRef.current
+      const tab = fileTabs.find(item => item.key === tabKey) ?? fileTabs[0]
+      const hasExistingDocuments = documentsRef.current.length > 0
+      loadingRef.current = true
+
+      if (mode === 'replace' && !preserveOnError) {
+        documentsRef.current = []
+        nextCursorRef.current = null
+        setDocuments([])
+        setNextCursor(null)
+        setPhase('loading')
+      }
+      if (mode === 'append') setLoadingMore(true)
+
+      try {
+        const page = await listDocuments(
+          tab.statusGroup,
+          mode === 'append' ? (nextCursorRef.current ?? undefined) : undefined
+        )
+        if (requestId !== requestIdRef.current) return
+
+        const nextDocuments =
+          mode === 'append' ? [...documentsRef.current, ...page.records] : page.records
+        documentsRef.current = nextDocuments
+        nextCursorRef.current = page.nextCursor
+        setDocuments(nextDocuments)
+        setNextCursor(page.nextCursor)
+        setPhase('success')
+      } catch {
+        if (requestId === requestIdRef.current && (!preserveOnError || !hasExistingDocuments)) {
+          setPhase('error')
+        }
+      } finally {
+        if (requestId === requestIdRef.current) {
+          loadingRef.current = false
+          setLoadingMore(false)
+        }
+      }
+    },
+    []
+  )
 
   useEffect(() => {
-    void fetchDocuments()
-  }, [])
+    void loadDocuments('replace', activeTab)
+  }, [activeTab, loadDocuments])
 
   usePullDownRefresh(() => {
-    void fetchDocuments().finally(() => void Taro.stopPullDownRefresh())
+    void loadDocuments('replace', activeTab, true).finally(() => void Taro.stopPullDownRefresh())
   })
 
   const openDocument = (record: DocumentRecord) => {
     const fileName = encodeURIComponent(record.fileName)
-    if (record.status === 'COMPLETED') {
-      void Taro.navigateTo({
-        url: `/pages/report/index?documentId=${record.id}&fileName=${fileName}`,
-      })
-      return
+
+    switch (getFileOpenTarget(record.status)) {
+      case 'report':
+        void Taro.navigateTo({
+          url: `/pages/report/index?documentId=${record.id}&fileName=${fileName}`,
+        })
+        return
+      case 'analysis':
+        // 列表项不含 taskId，只带 documentId，由分析页反查该文件最近一次任务
+        void Taro.navigateTo({
+          url: `/pages/analysis/index?documentId=${record.id}&fileName=${fileName}`,
+        })
+        return
+      default:
+        void Taro.showToast({ title: '分析失败，请重新上传文件', icon: 'none' })
     }
-    if (isAnalyzingStatus(record.status)) {
-      void Taro.navigateTo({ url: `/pages/analysis/index?fileName=${fileName}` })
-      return
-    }
-    void Taro.showToast({ title: '分析失败，请重新上传文件', icon: 'none' })
   }
 
   const activeTabConfig = fileTabs.find(tab => tab.key === activeTab) ?? fileTabs[0]
-  const visibleDocuments = documents.filter(record => matchesFileTab(record, activeTab))
 
   return (
     <PageShell bottomNav="files" className="files-page">
@@ -122,10 +169,7 @@ export default function FilesPage() {
             <AppButton
               className="files-state__action"
               variant="secondary"
-              onClick={() => {
-                setPhase('loading')
-                void fetchDocuments()
-              }}
+              onClick={() => void loadDocuments('replace', activeTab)}
             >
               重新加载
             </AppButton>
@@ -134,7 +178,7 @@ export default function FilesPage() {
       )}
 
       {phase === 'success' &&
-        (visibleDocuments.length === 0 ? (
+        (documents.length === 0 ? (
           <View className="files-state">
             <View className="files-state__icon">
               <Order size="34" />
@@ -144,7 +188,7 @@ export default function FilesPage() {
           </View>
         ) : (
           <View className="files-list">
-            {visibleDocuments.map(record => {
+            {documents.map(record => {
               const kind = getFileKind(record.fileName)
               const badge = getFileBadge(record)
               const KindIcon = fileKindIcons[kind]
@@ -172,6 +216,20 @@ export default function FilesPage() {
                 </View>
               )
             })}
+            {nextCursor === null ? (
+              <Text className="files-list__footer" aria-live="polite">
+                没有更多文件
+              </Text>
+            ) : (
+              <AppButton
+                className="files-list__load-more"
+                variant="ghost"
+                disabled={loadingMore}
+                onClick={() => void loadDocuments('append', activeTab)}
+              >
+                {loadingMore ? '正在加载更多…' : '加载更多'}
+              </AppButton>
+            )}
           </View>
         ))}
     </PageShell>
