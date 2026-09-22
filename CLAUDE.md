@@ -35,7 +35,7 @@ pnpm check:design-system
 pnpm format
 ```
 
-环境变量 `API_BASE_URL` 由 `cross-env` 注入 → `config/index.ts` 的 `defineConstants` → `process.env.API_BASE_URL`；`src/utils/request.ts` 兜底 `http://localhost:8080`。项目没有 dotenv。
+构建变量由 `cross-env` 注入 → `config/index.ts` 的 `defineConstants` → `process.env.*`，项目没有 dotenv。三个都可选：`API_BASE_URL` 一旦注入，`request.ts` 就改走 http 直连（本地联调用，见 `pnpm dev:weapp:local`）；不注入即走云托管内网 `callContainer`，环境 ID 与服务名的默认值在 `src/constants/index.ts`，需要覆盖时用 `CLOUDRUN_ENV` / `CLOUDRUN_SERVICE`。
 
 ## 架构要点
 
