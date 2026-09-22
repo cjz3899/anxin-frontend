@@ -1,4 +1,6 @@
-import { request, upload } from '../utils/request'
+import { request } from '../utils/request'
+import { fileNameFromPath } from '../utils/file-name'
+import { uploadFileToOss, type UploadCredential } from './document'
 
 /** 登录 / 刷新返回的双 Token 数据 */
 export interface LoginResult {
@@ -52,7 +54,23 @@ export function getCurrentUser(): Promise<UserProfile> {
   return request<UserProfile>({ url: '/api/user/me' })
 }
 
-/** 上传头像：后端校验大小/真实类型 + 微信 imgSecCheck 内容安全，返回 OSS 头像地址 */
-export function uploadAvatar(filePath: string): Promise<string> {
-  return upload<{ avatar: string }>({ url: '/api/user/avatar', filePath }).then(res => res.avatar)
+/**
+ * 上传头像：签发凭证 → 图片直传 OSS → 后端确认（大小/真实格式/微信内容安全），返回头像地址。
+ * 图片字节不再经后端中转——内网调用的请求体上限远小于 2MB
+ */
+export async function uploadAvatar(filePath: string): Promise<string> {
+  //chooseAvatar 给的是临时路径没有原始文件名，后缀只能从路径尾巴上摘
+  const fileName = fileNameFromPath(filePath)
+  const credential = await request<UploadCredential>({
+    url: '/api/user/avatar-credential',
+    method: 'POST',
+    data: { fileName },
+  })
+  await uploadFileToOss(credential, filePath)
+  const result = await request<{ avatar: string }>({
+    url: '/api/user/avatar-confirm',
+    method: 'POST',
+    data: { objectKey: credential.key, fileName },
+  })
+  return result.avatar
 }

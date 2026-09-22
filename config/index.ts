@@ -14,9 +14,11 @@ export default defineConfig({
   outputRoot: 'dist',
   plugins: ['@tarojs/plugin-html'],
   defineConstants: {
-    'process.env.API_BASE_URL': JSON.stringify(
-      process.env.API_BASE_URL || 'http://localhost:8080'
-    ),
+    //只有本地联调才注入 http 地址；线上不注入即走云托管内网 callContainer
+    'process.env.API_BASE_URL': JSON.stringify(process.env.API_BASE_URL || ''),
+    //留空时由 src/constants 里的默认环境 ID 与服务名兜底
+    'process.env.CLOUDRUN_ENV': JSON.stringify(process.env.CLOUDRUN_ENV || ''),
+    'process.env.CLOUDRUN_SERVICE': JSON.stringify(process.env.CLOUDRUN_SERVICE || ''),
   },
   copy: {
     patterns: [],

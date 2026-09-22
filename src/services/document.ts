@@ -1,4 +1,4 @@
-import { request, upload } from '../utils/request'
+import { request, uploadToOss } from '../utils/request'
 
 /** 统一响应包装（后端 Result） */
 export interface PageResult<T> {
@@ -99,12 +99,57 @@ export interface AnalysisTask {
 /** 文件列表状态筛选分组 */
 export type DocumentStatusGroup = 'ALL' | 'PROCESSING' | 'SUCCESS' | 'FAILED'
 
-/** 上传 PDF/Word/图片并创建分析任务 */
-export function uploadDocument(filePath: string): Promise<DocumentUploadResult> {
-  return upload<DocumentUploadResult>({
-    url: '/api/document/upload',
+/** OSS 表单直传凭证（后端 UploadCredentialVO） */
+export interface UploadCredential {
+  /** 上传地址，直接喂给 wx.uploadFile */
+  host: string
+  /** 服务端定死的对象名，回填表单 key 字段，客户端改不了 */
+  key: string
+  /** base64 编码的 PostPolicy */
+  policy: string
+  signature: string
+  accessKeyId: string
+  /** 凭证过期时间（秒级时间戳） */
+  expire: number
+  /** 本次允许的最大字节数，与写进 PostPolicy 的上限一致 */
+  maxBytes: number
+}
+
+/** 申请 OSS 表单直传凭证（扩展名不在白名单内时后端直接报错） */
+export function getUploadCredential(fileName: string): Promise<UploadCredential> {
+  return request<UploadCredential>({
+    url: '/api/document/upload-credential',
+    method: 'POST',
+    data: { fileName },
+  })
+}
+
+/** 把文件字节直传给对象存储，不经过后端 */
+export function uploadFileToOss(credential: UploadCredential, filePath: string): Promise<void> {
+  return uploadToOss({
+    url: credential.host,
     filePath,
     name: 'file',
+    formData: {
+      key: credential.key,
+      policy: credential.policy,
+      OSSAccessKeyId: credential.accessKeyId,
+      signature: credential.signature,
+      //显式要求 200，否则 OSS 默认回 204
+      success_action_status: '200',
+    },
+  })
+}
+
+/** 直传成功后登记文件并创建分析任务 */
+export function confirmDocumentUpload(
+  objectKey: string,
+  fileName: string
+): Promise<DocumentUploadResult> {
+  return request<DocumentUploadResult>({
+    url: '/api/document/upload-confirm',
+    method: 'POST',
+    data: { objectKey, fileName },
   })
 }
 
