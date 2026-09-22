@@ -29,6 +29,15 @@ export interface UploadOptions {
   showError?: boolean
 }
 
+export interface DirectUploadOptions {
+  /** 对象存储下发的完整上传地址，不拼 BASE_URL */
+  url: string
+  filePath: string
+  name?: string
+  formData?: Record<string, any>
+  showError?: boolean
+}
+
 function isAuthExpired(code: number): boolean {
   return code === 401 || code === AUTH_EXPIRED_CODE
 }
@@ -126,6 +135,35 @@ export function upload<T = unknown>(options: UploadOptions): Promise<T> {
       },
       fail: err => {
         Taro.showToast({ title: '网络错误', icon: 'none' })
+        reject(err)
+      },
+    })
+  })
+}
+
+/**
+ * 直传对象存储（OSS 表单直传）。与 upload() 的三点区别：
+ * 地址由服务端下发、不拼 BASE_URL；鉴权靠 PostPolicy 签名、不注入 authorization；
+ * 成功时 OSS 返回空响应体，不能按 { code, data, msg } 解析，只能按 HTTP 状态码判定。
+ */
+export function uploadToOss(options: DirectUploadOptions): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    Taro.uploadFile({
+      url: options.url,
+      filePath: options.filePath,
+      name: options.name || 'file',
+      formData: options.formData,
+      success: res => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve()
+          return
+        }
+        //OSS 的错误体是 XML，拿给用户看没有意义，只给一句可执行的提示
+        showRequestError(options, '文件上传失败，请重试')
+        reject(res)
+      },
+      fail: err => {
+        showRequestError(options, '网络错误')
         reject(err)
       },
     })

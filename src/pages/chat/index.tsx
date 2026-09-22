@@ -13,10 +13,30 @@ import {
   sendChatMessage,
   type ChatMessage,
 } from '../../services'
+import {
+  createOptimisticMessages,
+  pollChatAnswer,
+  resolveAnswerText,
+  type ChatAnswerPollDependencies,
+} from './model'
 
 import './index.less'
 
 const MAX_CONTENT_LENGTH = 1000
+
+/**
+ * 轮询接线：真实计时与「页面是否还在」的判断由页面注入，
+ * pollChatAnswer 本身不依赖 Taro，才能脱离运行时单测
+ */
+function createPollDependencies(isCancelled: () => boolean): ChatAnswerPollDependencies {
+  return {
+    //轮询失败不弹 toast，否则网络抖一下就一直刷屏
+    listChatMessages: sessionId => listChatMessages(sessionId, { showError: false }),
+    sleep: ms => new Promise<void>(resolve => setTimeout(resolve, ms)),
+    now: () => Date.now(),
+    isCancelled,
+  }
+}
 
 export default function ChatPage() {
   const { params } = useRouter()
@@ -30,6 +50,15 @@ export default function ChatPage() {
   const [loadFailed, setLoadFailed] = useState(false)
   const sessionIdRef = useRef('')
   const scrollAnchorId = useRef(`anchor-${Date.now()}`)
+  const mountedRef = useRef(true)
+
+  // 离开页面时掐断轮询，避免在已卸载的组件上继续 setState
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   const scrollToBottom = () => {
     scrollAnchorId.current = `anchor-${Date.now()}`
@@ -70,33 +99,43 @@ export default function ChatPage() {
     }
   }, [documentId, fileName])
 
+  /** 用服务端会话列表覆盖本地状态，占位行与真实行不会长期不一致 */
+  const refreshMessages = async (sessionId: string) => {
+    try {
+      const history = await listChatMessages(sessionId)
+      if (!mountedRef.current) return
+      setMessages(history)
+    } catch {
+      //连历史都拉不到时保持现状，用户退出重进即可恢复
+    }
+  }
+
   const handleSend = async () => {
     const content = inputValue.trim()
     if (!content || sending || !sessionIdRef.current) return
 
+    const sessionId = sessionIdRef.current
     setInputValue('')
     setSending(true)
-    // 本地先插入用户消息，AI 回复由接口返回后追加
-    setMessages(prev => [
-      ...prev,
-      {
-        messageId: `local-${Date.now()}`,
-        role: 'USER',
-        content,
-        references: [],
-        createdTime: '',
-      },
-    ])
+    //先摆出「问题 + 生成中的回答」，用户不必对着空白等模型
+    setMessages(prev => [...prev, ...createOptimisticMessages(content, Date.now())])
     scrollToBottom()
 
     try {
-      const reply = await sendChatMessage(sessionIdRef.current, content)
-      setMessages(prev => [...prev, reply])
-      scrollToBottom()
+      const accepted = await sendChatMessage(sessionId, content)
+      await pollChatAnswer(
+        createPollDependencies(() => !mountedRef.current),
+        sessionId,
+        accepted.messageId
+      )
     } catch {
-      Taro.showToast({ title: '发送失败，请重试', icon: 'none' })
+      //提问被拒时请求层已经提示过，这里只负责把界面收口
     } finally {
-      setSending(false)
+      await refreshMessages(sessionId)
+      if (mountedRef.current) {
+        setSending(false)
+      }
+      scrollToBottom()
     }
   }
 
@@ -166,7 +205,7 @@ export default function ChatPage() {
               <View className="chat-answer__avatar">AI</View>
               <View className="chat-answer__body">
                 <View className="chat-bubble chat-bubble--assistant">
-                  <Text>{message.content}</Text>
+                  <Text>{resolveAnswerText(message).text}</Text>
                 </View>
                 {(message.references ?? []).map(reference => (
                   <View className="chat-reference" key={reference.sectionId}>

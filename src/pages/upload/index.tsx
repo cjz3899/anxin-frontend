@@ -5,14 +5,17 @@ import { Text, View } from '@tarojs/components'
 
 import AppButton from '../../components/app-button'
 import PageShell from '../../components/page-shell'
-import { uploadDocument } from '../../services'
+import { confirmDocumentUpload, getUploadCredential, uploadFileToOss } from '../../services'
+import { runUploadFlow, type SelectedUploadFile, type UploadFlowDependencies } from './model'
 
 import './index.less'
 
-interface SelectedFile {
-  name: string
-  path: string
-  size: number
+/** 三步编排放在 model.ts，页面只做 Taro 侧接线，方便脱离运行时测试 */
+const uploadFlowDependencies: UploadFlowDependencies = {
+  getUploadCredential,
+  uploadFileToOss,
+  confirmDocumentUpload,
+  notify: title => Taro.showToast({ title, icon: 'none' }),
 }
 
 function formatSize(bytes: number): string {
@@ -21,7 +24,7 @@ function formatSize(bytes: number): string {
 }
 
 export default function UploadPage() {
-  const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null)
+  const [selectedFile, setSelectedFile] = useState<SelectedUploadFile | null>(null)
   const [uploading, setUploading] = useState(false)
 
   const handleChoose = async () => {
@@ -40,10 +43,13 @@ export default function UploadPage() {
     setUploading(true)
 
     try {
-      const result = await uploadDocument(selectedFile.path)
+      const result = await runUploadFlow(uploadFlowDependencies, selectedFile)
+      if (!result) return
       await Taro.redirectTo({
         url: `/pages/analysis/index?taskId=${result.taskId}&documentId=${result.documentId}&fileName=${encodeURIComponent(selectedFile.name)}`,
       })
+    } catch {
+      //失败提示已由请求层给出，这里只需要放开按钮，避免用户被禁用状态卡住
     } finally {
       setUploading(false)
     }
