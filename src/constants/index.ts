@@ -12,4 +12,4 @@ export const STORAGE_KEYS = {
  * 它们是打进小程序包的公开配置，不是密钥；换环境时用构建变量覆盖
  */
 export const CLOUDRUN_ENV = process.env.CLOUDRUN_ENV || 'prod-d1gw1hyg964f1acb3'
-export const CLOUDRUN_SERVICE = process.env.CLOUDRUN_SERVICE || 'springboot-8oag'
+export const CLOUDRUN_SERVICE = process.env.CLOUDRUN_SERVICE || 'anxin'
